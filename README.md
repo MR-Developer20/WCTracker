@@ -1,4 +1,5 @@
 # WC Tracker
+(Disclaimer: 100% by Claude Code, not a flex I'm just dumb)
 
 An iPad-first **second-screen companion** for the FIFA World Cup 26 — built to sit on
 a tablet beside the TV. Landscape layout:
