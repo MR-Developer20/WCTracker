@@ -13,8 +13,9 @@ struct SecondScreenView: View {
 
     /// The scoreboard reads bigger on iPad's larger canvas.
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var scoreboardScale: CGFloat { isPad ? 1.3 : 1.0 }
-    private var topBarHeight: CGFloat { isPad ? 88 : 66 }
+    private var scoreboardScale: CGFloat { isPad ? 1.3 : 0.8 }
+    private var topBarHeight: CGFloat { isPad ? 88 : 54 }
+    private var topBarPadding: CGFloat { isPad ? 10 : 6 }
 
     /// The right-hand info-card column takes a bigger share on iPhone (where the
     /// broadcast-style 1/3 is too cramped for the cards); iPad keeps the 1/3 look.
@@ -34,7 +35,7 @@ struct SecondScreenView: View {
             VStack(spacing: 0) {
                 topBar
                     .frame(height: topBarHeight)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, topBarPadding)
 
                 GeometryReader { geo in
                     if center.mode == .standings {
