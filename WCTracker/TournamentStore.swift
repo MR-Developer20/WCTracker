@@ -32,7 +32,9 @@ final class TournamentStore: ObservableObject {
         guard !started else { return }
         started = true
         pollTimer?.invalidate()
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+        // ESPN is unofficial with no published limit and refreshes on a ~10-20s
+        // cadence; poll about as fast as that to keep the scorebug score/clock fresh.
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
         }
         Task { await refresh() }
@@ -98,7 +100,10 @@ final class TournamentStore: ObservableObject {
                   let old = prior[match.id], old.minute == minute,
                   let anchor = old.fetchedAt else { return match }
             var carried = match
+            // Carry the original anchor (time + seconds) so the clock keeps ticking
+            // from where it was instead of snapping back each poll.
             carried.fetchedAt = anchor
+            carried.clockSeconds = old.clockSeconds ?? carried.clockSeconds
             return carried
         }
     }

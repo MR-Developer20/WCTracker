@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target 'WCTracker' in project 'WCTracker' (no dependencies)

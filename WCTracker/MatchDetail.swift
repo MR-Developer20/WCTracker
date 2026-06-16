@@ -10,6 +10,13 @@ struct PitchPoint: Equatable {
     static let center = PitchPoint(x: 0.5, y: 0.5)
 }
 
+/// A located on-ball event used to build the possession heat map (team-relative,
+/// canonical orientation — home attacks right).
+struct HeatPoint {
+    var point: PitchPoint
+    var isHome: Bool
+}
+
 /// Position rows used to lay a formation out on the pitch.
 enum PitchRole: Int, CaseIterable {
     case gk, def, dm, mid, am, fwd
@@ -29,6 +36,13 @@ enum PitchRole: Int, CaseIterable {
 
 // MARK: - Lineups
 
+struct PlayerStat: Identifiable {
+    var id: String { label }
+    var label: String       // stat abbreviation, e.g. "G", "SHT"
+    var name: String        // full stat name, e.g. "Goals"
+    var value: String
+}
+
 struct LineupPlayer: Identifiable {
     let id: String
     var name: String        // display name, e.g. "Raúl Jiménez"
@@ -38,6 +52,11 @@ struct LineupPlayer: Identifiable {
     var role: PitchRole
     var point: PitchPoint   // normalized pitch position
     var isHome: Bool
+    var headshotURL: URL? = nil
+    var subbedOut: Bool = false
+    var subbedIn: Bool = false
+    var formationPlace: Int? = nil
+    var stats: [PlayerStat] = []
 }
 
 struct Lineup: Identifiable {
@@ -79,6 +98,17 @@ struct MatchEvent: Identifiable {
         if t.contains("kickoff") || t.contains("half") || t.contains("full time") || t.contains("whistle") { return .whistle }
         return .other
     }
+}
+
+/// An on-ball play with a real pitch location from ESPN's `commentary` feed.
+struct PlayPoint: Identifiable {
+    let id = UUID()
+    var minute: Int
+    var clockText: String
+    var typeText: String
+    var isHome: Bool?
+    var text: String?
+    var point: PitchPoint   // normalized, canonical orientation (home attacks right)
 }
 
 struct GoalEvent: Identifiable {
@@ -129,7 +159,111 @@ struct MatchWeather {
     var humidity: Int?
     var source: Source
 
-    var temperatureText: String { "\(Int(temperatureC.rounded()))°C" }
+    var temperatureText: String { TemperatureUnit.celsius.display(celsius: temperatureC) }
+}
+
+/// User-selectable temperature unit for the weather card.
+enum TemperatureUnit: String, CaseIterable, Identifiable {
+    case celsius = "°C"
+    case fahrenheit = "°F"
+    var id: String { rawValue }
+
+    func display(celsius: Double) -> String {
+        switch self {
+        case .celsius: return "\(Int(celsius.rounded()))°C"
+        case .fahrenheit: return "\(Int((celsius * 9 / 5 + 32).rounded()))°F"
+        }
+    }
+}
+
+// MARK: - Format & officials
+
+/// Match format from ESPN `format.regulation` — used to drive the clock/ET logic.
+struct MatchFormat {
+    var periods: Int        // regulation periods (e.g. 2)
+    var halfMinutes: Int    // minutes per period (e.g. 45)
+    var regulationMinutes: Int { periods * halfMinutes }   // e.g. 90
+    var summary: String { "\(periods) × \(halfMinutes)'" }
+}
+
+struct Official: Identifiable {
+    let id = UUID()
+    var name: String
+    var role: String
+}
+
+// MARK: - Leaders / broadcasts / media
+
+struct StatLeader: Identifiable {
+    let id = UUID()
+    var category: String
+    var player: String
+    var value: String
+}
+
+struct TeamLeaders: Identifiable {
+    var id: String { code }
+    var code: String
+    var isHome: Bool
+    var entries: [StatLeader]
+}
+
+struct Broadcast: Identifiable {
+    let id = UUID()
+    var name: String
+    var kind: String   // "TV" / "Streaming" / …
+}
+
+struct NewsItem: Identifiable {
+    let id = UUID()
+    var headline: String
+    var url: URL?
+}
+
+struct VideoItem: Identifiable {
+    let id = UUID()
+    var headline: String
+    var url: URL?
+    var thumbnail: URL?
+    var duration: Int?
+}
+
+// MARK: - Configurable info cards
+
+/// The cards shown in the right info panel; user-orderable / hideable.
+enum InfoCardKind: String, CaseIterable, Identifiable, Codable {
+    case goals, teamStats, stadium, officials, weather, events, leaders, broadcasts, news, videos
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .goals: return "Goals"
+        case .teamStats: return "Team Stats"
+        case .stadium: return "Stadium"
+        case .officials: return "Officials"
+        case .weather: return "Weather"
+        case .events: return "Match Events"
+        case .leaders: return "Leaders"
+        case .broadcasts: return "Where to Watch"
+        case .news: return "News"
+        case .videos: return "Videos"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .goals: return "soccerball.inverse"
+        case .teamStats: return "chart.bar.xaxis"
+        case .stadium: return "sportscourt"
+        case .officials: return "whistle"
+        case .weather: return "cloud.sun"
+        case .events: return "list.bullet.rectangle"
+        case .leaders: return "star.circle"
+        case .broadcasts: return "tv"
+        case .news: return "newspaper"
+        case .videos: return "play.rectangle"
+        }
+    }
 }
 
 // MARK: - Aggregate detail
@@ -142,9 +276,19 @@ struct MatchDetail {
     var goals: [GoalEvent]
     var stats: [TeamStat]
     var venue: VenueInfo?
+    var format: MatchFormat? = nil
+    var officials: [Official] = []
+    var leaders: [TeamLeaders] = []
+    var broadcasts: [Broadcast] = []
+    var articles: [NewsItem] = []
+    var videos: [VideoItem] = []
+    /// On-ball plays with real pitch coordinates (ESPN commentary), oldest → newest.
+    var plays: [PlayPoint] = []
 
     var hasLineups: Bool { (homeLineup?.starters.isEmpty == false) || (awayLineup?.starters.isEmpty == false) }
     var allPlayers: [LineupPlayer] { (homeLineup?.starters ?? []) + (awayLineup?.starters ?? []) }
+    /// The most recent real ball location (nil if the feed has no coordinates yet).
+    var ballPoint: PitchPoint? { plays.last?.point }
 }
 
 // MARK: - Pitch layout
@@ -180,37 +324,87 @@ enum PitchLayout {
         var shortName: String
         var number: String
         var abbr: String
+        var headshotURL: URL? = nil
+        var subbedOut: Bool = false
+        var subbedIn: Bool = false
+        var formationPlace: Int? = nil
+        var stats: [PlayerStat] = []
     }
 
-    /// Distribute starters into formation rows and compute normalized pitch points.
-    /// Home defends the left goal (x≈0) and attacks right; away is mirrored.
-    static func place(_ raw: [RawPlayer], isHome: Bool) -> [LineupPlayer] {
+    private static func x(forDepth depth: Double, isHome: Bool) -> Double {
+        isHome ? (0.045 + depth * 0.42) : (0.955 - depth * 0.42)
+    }
+
+    private static func make(_ p: RawPlayer, isHome: Bool, x: Double, y: Double) -> LineupPlayer {
+        LineupPlayer(
+            id: p.id, name: p.name, shortName: p.shortName, number: p.number,
+            positionAbbr: p.abbr, role: role(for: p.abbr),
+            point: PitchPoint(x: x, y: y), isHome: isHome,
+            headshotURL: p.headshotURL, subbedOut: p.subbedOut, subbedIn: p.subbedIn,
+            formationPlace: p.formationPlace, stats: p.stats)
+    }
+
+    /// Outfield line sizes from the formation string ("4-2-3-1" → [4,2,3,1]); nil/
+    /// mismatched returns [] so the caller falls back to role buckets.
+    private static func formationLines(_ formation: String?, count: Int) -> [Int] {
+        guard let formation else { return [] }
+        let sizes = formation.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        return sizes.reduce(0, +) == count && !sizes.isEmpty ? sizes : []
+    }
+
+    /// Lay players out from the declared formation so the shape is exact (a 4-2-3-1
+    /// shows as 4-2-3-1). Home defends the left goal (x≈0) and attacks right.
+    static func place(_ raw: [RawPlayer], isHome: Bool, formation: String?) -> [LineupPlayer] {
+        let keepers = raw.filter { role(for: $0.abbr) == .gk }
+        var outfield = raw.filter { role(for: $0.abbr) != .gk }
+        let lines = formationLines(formation, count: outfield.count)
+        guard !lines.isEmpty else { return placeByRole(raw, isHome: isHome) }
+
+        // Order outfield from defenders → forwards so the back-most fill the first line.
+        outfield.sort {
+            (role(for: $0.abbr).rawValue, formationPlaceOrder($0)) < (role(for: $1.abbr).rawValue, formationPlaceOrder($1))
+        }
+
+        var result = keepers.map { make($0, isHome: isHome, x: x(forDepth: 0.0, isHome: isHome), y: 0.5) }
+        let lineCount = lines.count
+        var i = 0
+        for (li, size) in lines.enumerated() {
+            var linePlayers = Array(outfield[i..<min(i + size, outfield.count)])
+            i += size
+            linePlayers.sort { (lateral(for: $0.abbr), formationPlaceOrder($0)) < (lateral(for: $1.abbr), formationPlaceOrder($1)) }
+            let depth = lineCount == 1 ? 0.7 : 0.40 + (0.96 - 0.40) * Double(li) / Double(lineCount - 1)
+            let px = x(forDepth: depth, isHome: isHome)
+            let maxAbs = linePlayers.map { abs(lateral(for: $0.abbr)) }.max() ?? 0
+            let (lo, hi): (Double, Double) = linePlayers.count >= 4 ? (0.10, 0.90)
+                : maxAbs >= 2 ? (0.14, 0.86)
+                : maxAbs == 1 ? (0.30, 0.70)
+                : (0.40, 0.60)
+            let n = linePlayers.count
+            for (j, p) in linePlayers.enumerated() {
+                let y = n == 1 ? 0.5 : lo + (hi - lo) * Double(j) / Double(n - 1)
+                result.append(make(p, isHome: isHome, x: px, y: y))
+            }
+        }
+        return result
+    }
+
+    private static func formationPlaceOrder(_ p: RawPlayer) -> Int { p.formationPlace ?? (Int(p.number) ?? 99) }
+
+    /// Fallback when the formation string is missing/inconsistent: bucket by role.
+    private static func placeByRole(_ raw: [RawPlayer], isHome: Bool) -> [LineupPlayer] {
         var rows: [PitchRole: [RawPlayer]] = [:]
         for p in raw { rows[role(for: p.abbr), default: []].append(p) }
-
         var result: [LineupPlayer] = []
         for roleRow in PitchRole.allCases {
             guard var players = rows[roleRow], !players.isEmpty else { continue }
-            players.sort {
-                (lateral(for: $0.abbr), Int($0.number) ?? 99) < (lateral(for: $1.abbr), Int($1.number) ?? 99)
-            }
-            let depth = roleRow.depth
-            let x = isHome ? (0.045 + depth * 0.42) : (0.955 - depth * 0.42)
-
-            // Widen the spread when the row has wide players (full-backs/wingers),
-            // and keep central-only rows (e.g. a CB or CM pair) toward the middle.
+            players.sort { (lateral(for: $0.abbr), formationPlaceOrder($0)) < (lateral(for: $1.abbr), formationPlaceOrder($1)) }
+            let px = x(forDepth: roleRow.depth, isHome: isHome)
             let maxAbs = players.map { abs(lateral(for: $0.abbr)) }.max() ?? 0
-            let (lo, hi): (Double, Double) = maxAbs >= 2 ? (0.12, 0.88)
-                : maxAbs == 1 ? (0.30, 0.70)
-                : (0.40, 0.60)
-
+            let (lo, hi): (Double, Double) = maxAbs >= 2 ? (0.12, 0.88) : maxAbs == 1 ? (0.30, 0.70) : (0.40, 0.60)
             let n = players.count
-            for (i, p) in players.enumerated() {
-                let y = n == 1 ? 0.5 : lo + (hi - lo) * Double(i) / Double(n - 1)
-                result.append(LineupPlayer(
-                    id: p.id, name: p.name, shortName: p.shortName, number: p.number,
-                    positionAbbr: p.abbr, role: roleRow,
-                    point: PitchPoint(x: x, y: y), isHome: isHome))
+            for (j, p) in players.enumerated() {
+                let y = n == 1 ? 0.5 : lo + (hi - lo) * Double(j) / Double(n - 1)
+                result.append(make(p, isHome: isHome, x: px, y: y))
             }
         }
         return result
@@ -255,8 +449,114 @@ enum ESPNSummaryParser {
             events: events,
             goals: goals(from: events),
             stats: stats(json, homeTeamId: homeTeamId),
-            venue: venue(json)
+            venue: venue(json),
+            format: format(json),
+            officials: officials(json),
+            leaders: leaders(json, homeTeamId: homeTeamId),
+            broadcasts: broadcasts(json),
+            articles: articles(json),
+            videos: videos(json),
+            plays: plays(json, homeTeamId: homeTeamId)
         )
+    }
+
+    // MARK: Format & officials
+
+    private static func format(_ json: JSONValue) -> MatchFormat? {
+        guard let reg = json.field(["format"])?.field(["regulation"]) else { return nil }
+        let periods = reg.int("periods") ?? 2
+        let clock = reg.field(["clock"])?.doubleValue ?? 2700
+        return MatchFormat(periods: periods, halfMinutes: Int((clock / 60).rounded()))
+    }
+
+    private static func officials(_ json: JSONValue) -> [Official] {
+        (json.field(["gameInfo"])?.field(["officials"])?.arrayValue ?? []).compactMap { o in
+            guard let name = o.string("displayName", "fullName") else { return nil }
+            return Official(name: name, role: o.field(["position"])?.string("displayName", "name") ?? "Official")
+        }
+    }
+
+    // MARK: Leaders / broadcasts / media
+
+    private static func leaders(_ json: JSONValue, homeTeamId: String) -> [TeamLeaders] {
+        (json.field(["leaders"])?.arrayValue ?? []).compactMap { group in
+            let team = group.field(["team"])
+            let code = (team?.string("abbreviation") ?? "").uppercased()
+            let isHome = team?.string("id") == homeTeamId
+            let entries = (group.field(["leaders"])?.arrayValue ?? []).compactMap { cat -> StatLeader? in
+                guard let top = cat.field(["leaders"])?.arrayValue?.first,
+                      let value = top.string("displayValue") else { return nil }
+                let player = top.field(["athlete"])?.string("displayName", "shortName") ?? "—"
+                return StatLeader(category: cat.string("displayName", "name") ?? "", player: player, value: value)
+            }
+            guard !entries.isEmpty else { return nil }
+            return TeamLeaders(code: code, isHome: isHome, entries: entries)
+        }
+    }
+
+    private static func broadcasts(_ json: JSONValue) -> [Broadcast] {
+        var seen = Set<String>()
+        return (json.field(["broadcasts"])?.arrayValue ?? []).compactMap { b in
+            guard let name = b.field(["media"])?.string("name", "shortName", "callLetters") else { return nil }
+            guard seen.insert(name).inserted else { return nil }
+            return Broadcast(name: name, kind: (b.field(["type"])?.string("longName", "shortName") ?? "TV").capitalized)
+        }
+    }
+
+    private static func articles(_ json: JSONValue) -> [NewsItem] {
+        (json.field(["news"])?.field(["articles"])?.arrayValue ?? []).compactMap { a in
+            guard let headline = a.string("headline", "description") else { return nil }
+            let url = a.field(["links"])?.field(["web"])?.string("href").flatMap { URL(string: $0) }
+            return NewsItem(headline: headline, url: url)
+        }
+    }
+
+    private static func videos(_ json: JSONValue) -> [VideoItem] {
+        (json.field(["videos"])?.arrayValue ?? []).compactMap { v in
+            guard let headline = v.string("headline", "description") else { return nil }
+            let links = v.field(["links"])
+            let url = (links?.field(["web"])?.string("href") ?? links?.field(["source"])?.string("href"))
+                .flatMap { URL(string: $0) }
+            return VideoItem(headline: headline,
+                             url: url,
+                             thumbnail: v.string("thumbnail").flatMap { URL(string: $0) },
+                             duration: v.int("duration"))
+        }
+    }
+
+    // MARK: Ball plays (real coordinates from `commentary`)
+
+    /// ESPN reports `fieldPositionX/Y` (start) and `fieldPosition2X/2Y` (end) on a
+    /// 0–100 grid, *team-relative* (x=100 = the team's attacking goal). Convert to a
+    /// canonical pitch where the home team attacks right; the half-switch is applied
+    /// separately by the view. Returns plays oldest → newest.
+    private static func plays(_ json: JSONValue, homeTeamId: String) -> [PlayPoint] {
+        var indexed: [(key: (Double, Int), play: PlayPoint)] = []
+        for (i, entry) in (json.field(["commentary"])?.arrayValue ?? []).enumerated() {
+            guard let play = entry.field(["play"]),
+                  let x = play.field(["fieldPositionX"])?.doubleValue,
+                  let y = play.field(["fieldPositionY"])?.doubleValue else { continue }
+            // Prefer the end location (where the ball finished).
+            let ex = play.field(["fieldPosition2X"])?.doubleValue ?? x
+            let ey = play.field(["fieldPosition2Y"])?.doubleValue ?? y
+            let isHome = play.field(["team"])?.string("id").map { $0 == homeTeamId }
+            let cx = (isHome ?? true) ? ex / 100 : 1 - ex / 100
+            let cy = ey / 100
+            let clockVal = play.field(["clock"])?.field(["value"])?.doubleValue ?? 0
+            let clockText = play.field(["clock"])?.string("displayValue")
+                ?? entry.field(["time"])?.string("displayValue") ?? ""
+            indexed.append((
+                key: (clockVal, i),
+                play: PlayPoint(
+                    minute: leadingInt(clockText) ?? Int(clockVal / 60),
+                    clockText: clockText,
+                    typeText: play.field(["type"])?.string("text") ?? "",
+                    isHome: isHome,
+                    text: play.string("text") ?? entry.string("text"),
+                    point: PitchPoint(x: min(1, max(0, cx)), y: min(1, max(0, cy))))
+            ))
+        }
+        return indexed.sorted { $0.key < $1.key }.map(\.play)
     }
 
     // MARK: Lineups
@@ -270,6 +570,7 @@ enum ESPNSummaryParser {
             let isHome = entry.string("homeAway") == "home" || teamId == homeTeamId
             let code = (team.string("abbreviation") ?? "").uppercased()
 
+            let formation = entry.string("formation")
             var starters: [PitchLayout.RawPlayer] = []
             var subs: [LineupPlayer] = []
             for p in entry.field(["roster"])?.arrayValue ?? [] {
@@ -279,12 +580,25 @@ enum ESPNSummaryParser {
                 let pid = athlete?.string("id") ?? UUID().uuidString
                 let number = p.string("jersey") ?? ""
                 let abbr = p.field(["position"])?.string("abbreviation") ?? ""
+                let headshot = athlete?.field(["headshot"])?.string("href").flatMap { URL(string: $0) }
+                let subbedOut = p.bool("subbedOut") ?? false
+                let subbedIn = p.bool("subbedIn") ?? false
+                let place = p.int("formationPlace")
+                let stats = (p.field(["stats"])?.arrayValue ?? []).compactMap { s -> PlayerStat? in
+                    guard let v = s.string("displayValue") else { return nil }
+                    let abbr = s.string("abbreviation") ?? s.string("name") ?? ""
+                    return PlayerStat(label: abbr, name: s.string("name") ?? abbr, value: v)
+                }
                 if p.bool("starter") == true {
-                    starters.append(.init(id: pid, name: name, shortName: shortName, number: number, abbr: abbr))
+                    starters.append(.init(id: pid, name: name, shortName: shortName, number: number, abbr: abbr,
+                                          headshotURL: headshot, subbedOut: subbedOut, subbedIn: subbedIn,
+                                          formationPlace: place, stats: stats))
                 } else {
                     subs.append(LineupPlayer(id: pid, name: name, shortName: shortName, number: number,
                                              positionAbbr: abbr, role: PitchLayout.role(for: abbr),
-                                             point: .center, isHome: isHome))
+                                             point: .center, isHome: isHome,
+                                             headshotURL: headshot, subbedOut: subbedOut, subbedIn: subbedIn,
+                                             formationPlace: place, stats: stats))
                 }
             }
 
@@ -293,9 +607,9 @@ enum ESPNSummaryParser {
                 name: team.string("displayName", "name") ?? code,
                 code: code,
                 colorHex: team.string("color"),
-                formation: entry.string("formation"),
+                formation: formation,
                 isHome: isHome,
-                starters: PitchLayout.place(starters, isHome: isHome),
+                starters: PitchLayout.place(starters, isHome: isHome, formation: formation),
                 substitutes: subs)
             if isHome { home = lineup } else { away = lineup }
         }

@@ -7,12 +7,21 @@ struct PitchView: View {
     var homeLineup: Lineup?
     var awayLineup: Lineup?
     var ball: PitchPoint?
+    /// Recent ball positions, faded oldest → newest (used by replay).
+    var trail: [PitchPoint] = []
+    /// User-supplied ball image; falls back to a soccerball symbol when nil.
+    var ballImage: UIImage? = nil
     var homeCode: String?
     var awayCode: String?
     var caption: String?
     /// Teams change ends at halftime — when flipped, home is drawn on the right
     /// (attacking left) and away on the left, mirroring the real match.
     var flipped: Bool = false
+    /// Possession heat-map points (team-relative, canonical) and whether to show them.
+    var heatPoints: [HeatPoint] = []
+    var showHeat: Bool = false
+    /// Tapping a player marker (used to show per-player stats).
+    var onSelectPlayer: ((LineupPlayer) -> Void)? = nil
 
     private let margin: CGFloat = 14
 
@@ -21,6 +30,12 @@ struct PitchView: View {
             let size = geo.size
             ZStack {
                 Canvas { ctx, _ in drawField(ctx, size: size) }
+
+                // Possession heat map (drawn over the grass, under the players).
+                if showHeat && !heatPoints.isEmpty {
+                    Canvas { ctx, _ in drawHeat(ctx, size: size) }
+                        .allowsHitTesting(false)
+                }
 
                 // Direction labels in each team's half (swap at halftime).
                 let labelY = margin + 22
@@ -41,12 +56,23 @@ struct PitchView: View {
                     PlayerMarker(player: player,
                                  kit: kitColor(for: player),
                                  diameter: markerDiameter(size))
+                        .contentShape(Rectangle())
+                        .onTapGesture { onSelectPlayer?(player) }
                         .position(point(player.point, in: size))
+                }
+
+                // Ball trail (replay): faint dots brightening toward the current ball.
+                ForEach(Array(trail.enumerated()), id: \.offset) { idx, p in
+                    let frac = Double(idx + 1) / Double(max(trail.count, 1))
+                    Circle()
+                        .fill(.white.opacity(0.08 + 0.22 * frac))
+                        .frame(width: 5 + 6 * frac, height: 5 + 6 * frac)
+                        .position(point(p, in: size))
                 }
 
                 // Ball.
                 if let ball {
-                    BallMarker()
+                    BallMarker(image: ballImage, size: markerDiameter(size) * 0.8)
                         .position(point(ball, in: size))
                         .animation(.easeInOut(duration: 0.45), value: ball)
                 }
@@ -55,9 +81,9 @@ struct PitchView: View {
                     VStack {
                         Spacer()
                         Text(caption)
-                            .font(.system(size: 11, weight: .medium))
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.85))
-                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .padding(.horizontal, 12).padding(.vertical, 6)
                             .background(.black.opacity(0.35), in: Capsule())
                             .padding(.bottom, 8)
                     }
@@ -76,8 +102,32 @@ struct PitchView: View {
         return hex.flatMap(Color.init(hex:)) ?? (player.isHome ? .blue : .red)
     }
 
+    private func heatColor(isHome: Bool) -> Color {
+        let hex = isHome ? homeLineup?.colorHex : awayLineup?.colorHex
+        return hex.flatMap(Color.init(hex:)) ?? (isHome ? .blue : .red)
+    }
+
+    /// Soft per-event blobs in each team's color; overlaps build the density map.
+    /// Drawn in canonical orientation (not flipped) since it aggregates the match.
+    private func drawHeat(_ ctx: GraphicsContext, size: CGSize) {
+        let radius = min(size.width, size.height) * 0.11
+        for hp in heatPoints {
+            let c = CGPoint(x: margin + hp.point.x * (size.width - 2 * margin),
+                            y: margin + hp.point.y * (size.height - 2 * margin))
+            let color = heatColor(isHome: hp.isHome)
+            let shading = GraphicsContext.Shading.radialGradient(
+                Gradient(colors: [color.opacity(0.22), color.opacity(0)]),
+                center: c, startRadius: 0, endRadius: radius)
+            ctx.fill(Path(ellipseIn: CGRect(x: c.x - radius, y: c.y - radius,
+                                            width: radius * 2, height: radius * 2)),
+                     with: shading)
+        }
+    }
+
+    /// Marker size scales with the pitch width so 22 players + labels stay legible
+    /// and don't overlap across device sizes (iPhone → iPad).
     private func markerDiameter(_ size: CGSize) -> CGFloat {
-        max(22, min(34, size.height * 0.055))
+        min(38, max(20, size.width * 0.044))
     }
 
     // MARK: Coordinate mapping
@@ -90,9 +140,9 @@ struct PitchView: View {
 
     private func halfLabel(_ code: String, attacking: String, at pos: CGPoint, size: CGSize) -> some View {
         Text("\(code) \(attacking)")
-            .font(.system(size: 12, weight: .heavy))
+            .font(.system(size: 15, weight: .heavy))
             .foregroundStyle(.white.opacity(0.85))
-            .padding(.horizontal, 8).padding(.vertical, 3)
+            .padding(.horizontal, 10).padding(.vertical, 4)
             .background(.black.opacity(0.3), in: Capsule())
             .position(pos)
     }
@@ -138,10 +188,6 @@ struct PitchView: View {
             // Penalty spot.
             let spotX = leftSide ? rect.minX + penW * 0.66 : rect.maxX - penW * 0.66
             ctx.fill(Path(ellipseIn: CGRect(x: spotX - 2.5, y: rect.midY - 2.5, width: 5, height: 5)), with: white)
-            // Goal net nub.
-            let netW: CGFloat = 6
-            let netX = leftSide ? rect.minX - netW : rect.maxX
-            ctx.fill(Path(CGRect(x: netX, y: rect.midY - goalH / 2, width: netW, height: goalH)), with: .color(.white.opacity(0.25)))
         }
     }
 }
@@ -155,24 +201,53 @@ private struct PlayerMarker: View {
 
     var body: some View {
         VStack(spacing: 2) {
+            marker
+                .frame(width: diameter, height: diameter)
+                .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
+                .opacity(player.subbedOut ? 0.45 : 1)
+                .overlay(alignment: .topTrailing) {
+                    // Subbed off ↓ / came on ↑ indicator.
+                    if player.subbedOut || player.subbedIn {
+                        Image(systemName: player.subbedIn ? "arrow.up" : "arrow.down")
+                            .font(.system(size: diameter * 0.3, weight: .black))
+                            .foregroundStyle(.white)
+                            .padding(2)
+                            .background(player.subbedIn ? .green : .red, in: Circle())
+                            .offset(x: 3, y: -3)
+                    }
+                }
+
+            // Number to the left of the name; scales with the marker so labels stay
+            // legible without overlapping across device sizes.
+            HStack(spacing: 3) {
+                Text(player.number).font(.system(size: numberFont, weight: .heavy)).foregroundStyle(Brand.mint)
+                Text(lastName(player.shortName)).font(.system(size: nameFont, weight: .semibold)).foregroundStyle(.white)
+            }
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 4).padding(.vertical, 1.5)
+            .background(.black.opacity(0.55), in: Capsule())
+        }
+    }
+
+    private var nameFont: CGFloat { min(13, max(8.5, diameter * 0.40)) }
+    private var numberFont: CGFloat { min(12, max(8, diameter * 0.38)) }
+
+    /// The headshot when the feed provides one, otherwise a kit-colored disc.
+    @ViewBuilder private var marker: some View {
+        if let url = player.headshotURL {
+            AsyncImage(url: url) { image in
+                image.resizable().scaledToFill()
+            } placeholder: {
+                Circle().fill(kit)
+            }
+            .clipShape(Circle())
+            .overlay(Circle().strokeBorder(.white.opacity(0.9), lineWidth: 1.5))
+        } else {
             ZStack {
                 Circle().fill(kit)
                 Circle().strokeBorder(.white.opacity(0.9), lineWidth: 1.5)
-                Text(player.number)
-                    .font(.system(size: diameter * 0.45, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.6), radius: 1)
             }
-            .frame(width: diameter, height: diameter)
-            .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
-
-            Text(lastName(player.shortName))
-                .font(.system(size: 9.5, weight: .semibold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .fixedSize()
-                .padding(.horizontal, 4).padding(.vertical, 1)
-                .background(.black.opacity(0.5), in: Capsule())
         }
     }
 
@@ -186,11 +261,24 @@ private struct PlayerMarker: View {
 // MARK: - Ball marker
 
 private struct BallMarker: View {
+    var image: UIImage?
+    var size: CGFloat = 26
+
     var body: some View {
-        Image(systemName: "soccerball")
-            .font(.system(size: 18, weight: .bold))
-            .foregroundStyle(.white)
-            .background(Circle().fill(.black.opacity(0.25)).frame(width: 22, height: 22))
-            .shadow(color: .black.opacity(0.5), radius: 2)
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            } else {
+                Image(systemName: "soccerball")
+                    .font(.system(size: size, weight: .bold))
+                    .foregroundStyle(.white)
+                    .background(Circle().fill(.black.opacity(0.25)).frame(width: size * 1.15, height: size * 1.15))
+            }
+        }
+        .shadow(color: .black.opacity(0.5), radius: 2)
     }
 }

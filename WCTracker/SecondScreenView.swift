@@ -1,12 +1,30 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Root second-screen layout
 
 struct SecondScreenView: View {
     @ObservedObject var center: MatchCenterStore
     @State private var showSettings = false
+    @State private var selectedPlayer: LineupPlayer?
+    @State private var showCardEditor = false
 
     private var tournament: TournamentStore { center.tournament }
+
+    /// The scoreboard reads bigger on iPad's larger canvas.
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var scoreboardScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var topBarHeight: CGFloat { isPad ? 88 : 66 }
+
+    /// The right-hand info-card column takes a bigger share on iPhone (where the
+    /// broadcast-style 1/3 is too cramped for the cards); iPad keeps the 1/3 look.
+    /// The pitch (and the scoreboard above it) take the rest.
+    private var cardFraction: CGFloat { isPad ? 1.0 / 3.0 : 0.42 }
+    private var pitchFraction: CGFloat { 1 - cardFraction }
+
+    /// Real football-pitch proportions (≈105×68 m), kept constant across devices so
+    /// the field reads the same on iPad as on iPhone instead of stretching to a square.
+    private static let pitchAspect: CGFloat = 1.55
 
     var body: some View {
         ZStack {
@@ -15,52 +33,75 @@ struct SecondScreenView: View {
 
             VStack(spacing: 0) {
                 topBar
-                    .frame(height: 54)
+                    .frame(height: topBarHeight)
                     .padding(.vertical, 10)
 
                 GeometryReader { geo in
-                    if center.mode == .live && center.focusMatch == nil {
+                    if center.mode == .standings {
+                        StandingsView(tournament: tournament)
+                    } else if center.mode == .live && center.focusMatch == nil {
                         noLiveMatchPlaceholder
                     } else {
-                        HStack(spacing: 0) {
+                        // Pane widths + side margins + the gap sum to the full width
+                        // (so the right cards aren't pushed off-screen). pad == gap
+                        // keeps the pitch centered under the scoreboard.
+                        let pad: CGFloat = 12, gap: CGFloat = 12
+                        let usable = geo.size.width - pad * 2 - gap
+                        HStack(spacing: gap) {
                             leftPane
-                                .frame(width: geo.size.width * 2.0 / 3.0)
-                                .padding(12)
+                                .frame(width: usable * pitchFraction)
                             rightPane
-                                .frame(width: geo.size.width * 1.0 / 3.0)
+                                .frame(width: usable * cardFraction)
                         }
+                        .padding(.horizontal, pad)
+                        .padding(.bottom, 10)
                     }
                 }
             }
         }
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showSettings) { SettingsView(store: center) }
+        .sheet(item: $selectedPlayer) { PlayerStatsSheet(player: $0) }
+        .sheet(isPresented: $showCardEditor) { CardLayoutEditor(store: center) }
     }
 
     // MARK: Top bar
 
     private var topBar: some View {
         GeometryReader { geo in
-            HStack(spacing: 0) {
-                // Left 2/3: scoreboard centered over the field view.
+            ZStack(alignment: .trailing) {
+                // Scoreboard centered over the pitch pane (matches the content split).
                 scoreboardArea
-                    .frame(width: geo.size.width * 2.0 / 3.0)
-                // Right 1/3: controls over the info panel.
+                    .frame(width: geo.size.width * pitchFraction)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Controls always pinned to the right edge, in every mode and state.
                 controlsArea
-                    .frame(width: geo.size.width * 1.0 / 3.0)
             }
         }
     }
 
     @ViewBuilder private var scoreboardArea: some View {
         Group {
-            if center.mode == .live {
-                BroadcastScoreboard(match: center.focusMatch,
-                                    home: focusHome, away: focusAway)
+            if center.mode == .standings {
+                Text("Group Standings")
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(.white)
+            } else if center.mode == .live {
+                // Hidden entirely when there's no match to show.
+                if let match = center.focusMatch {
+                    BroadcastScoreboard(match: match,
+                                        home: focusHome, away: focusAway,
+                                        badgeImage: center.badgeImage,
+                                        half: center.activeDetail?.format?.halfMinutes ?? 45)
+                        .scaleEffect(scoreboardScale)
+                }
             } else if let m = center.selectedReplayMatch {
                 BroadcastScoreboard(match: m,
                                     home: tournament.team(for: m, home: true),
-                                    away: tournament.team(for: m, home: false))
+                                    away: tournament.team(for: m, home: false),
+                                    badgeImage: center.badgeImage,
+                                    half: center.replayDetail?.format?.halfMinutes ?? 45)
+                    .scaleEffect(scoreboardScale)
             } else {
                 Text("Replay — pick a 2026 match")
                     .font(.system(size: 18, weight: .heavy))
@@ -72,7 +113,6 @@ struct SecondScreenView: View {
 
     private var controlsArea: some View {
         HStack(spacing: 10) {
-            Spacer(minLength: 0)
             if center.demoMode {
                 Text("DEMO")
                     .font(.system(size: 11, weight: .black))
@@ -88,9 +128,10 @@ struct SecondScreenView: View {
                 set: { center.setMode($0) })) {
                 Text("Live").tag(MatchCenterStore.Mode.live)
                 Text("Replay").tag(MatchCenterStore.Mode.replay)
+                Text("Table").tag(MatchCenterStore.Mode.standings)
             }
             .pickerStyle(.segmented)
-            .frame(width: 150)
+            .frame(width: isPad ? 210 : 168)
             .fixedSize()
             Button { showSettings = true } label: {
                 Image(systemName: "gearshape.fill").font(.system(size: 18))
@@ -140,7 +181,14 @@ struct SecondScreenView: View {
 
     private var noLiveMatchPlaceholder: some View {
         VStack(spacing: 14) {
-            Image("WC26Badge").resizable().scaledToFit().frame(height: 88).opacity(0.9)
+            Group {
+                if let badge = center.badgeImage {
+                    Image(uiImage: badge).resizable().scaledToFit()
+                } else {
+                    Image(systemName: "trophy.fill").resizable().scaledToFit().foregroundStyle(Brand.mint)
+                }
+            }
+            .frame(height: 80).opacity(0.9)
             Text("No match live right now")
                 .font(.system(size: 24, weight: .heavy)).foregroundStyle(.white)
             if let next = nextUpcoming {
@@ -191,12 +239,21 @@ struct SecondScreenView: View {
             PitchView(homeLineup: detail.homeLineup,
                       awayLineup: detail.awayLineup,
                       ball: center.ball,
+                      ballImage: center.ballImage,
                       homeCode: focusHome?.code,
                       awayCode: focusAway?.code,
                       caption: center.demoMode
                           ? "DEMO · sample formations & ball motion"
-                          : "Player positions by formation · ball estimated from live events",
-                      flipped: center.liveFlipped)
+                          : (center.hasRealBall
+                              ? "Player positions by formation · live ball from ESPN"
+                              : "Player positions by formation · ball estimated from live events"),
+                      flipped: center.liveFlipped,
+                      heatPoints: center.heatPoints,
+                      showHeat: center.showHeatMap,
+                      onSelectPlayer: { selectedPlayer = $0 })
+                .aspectRatio(Self.pitchAspect, contentMode: .fit)
+                .overlay(alignment: .bottomTrailing) { heatToggle }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             pitchPlaceholder(center.isLoadingDetail ? "Loading lineups…" : "Lineups appear near kickoff")
         }
@@ -208,10 +265,18 @@ struct SecondScreenView: View {
                 PitchView(homeLineup: detail.homeLineup,
                           awayLineup: detail.awayLineup,
                           ball: center.replayBall,
+                          trail: center.replayTrail,
+                          ballImage: center.ballImage,
                           homeCode: tournament.team(for: match, home: true).code,
                           awayCode: tournament.team(for: match, home: false).code,
                           caption: replayCaption,
-                          flipped: center.replayFlipped)
+                          flipped: center.replayFlipped,
+                          heatPoints: center.heatPoints,
+                          showHeat: center.showHeatMap,
+                          onSelectPlayer: { selectedPlayer = $0 })
+                    .aspectRatio(Self.pitchAspect, contentMode: .fit)
+                    .overlay(alignment: .bottomTrailing) { heatToggle }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 replayTransport
             }
         } else if center.isLoadingReplay {
@@ -222,10 +287,9 @@ struct SecondScreenView: View {
     }
 
     private var replayCaption: String {
-        guard let e = center.currentReplayEvent else { return "Step through the match events" }
-        let clk = e.clockText.isEmpty ? "" : "\(e.clockText) "
-        let who = e.playerName.map { " · \($0)" } ?? ""
-        return "\(clk)\(e.typeText)\(who)  ·  positions estimated"
+        guard let p = center.currentReplayPlay else { return "Step through the match — real ESPN coordinates" }
+        let clk = p.clockText.isEmpty ? "" : "\(p.clockText) "
+        return "\(clk)\(p.typeText)  ·  real ESPN coordinates"
     }
 
     private var replayTransport: some View {
@@ -239,10 +303,10 @@ struct SecondScreenView: View {
             Slider(value: Binding(
                 get: { Double(center.replayIndex) },
                 set: { center.pauseReplay(); center.replayIndex = Int($0) }),
-                   in: 0...Double(max(1, center.replayEvents.count - 1)))
+                   in: 0...Double(max(1, center.replayPlays.count - 1)))
             .tint(Brand.mint)
 
-            Text(center.currentReplayEvent?.clockText ?? "")
+            Text(center.currentReplayPlay?.clockText ?? "")
                 .font(.system(size: 13, weight: .heavy)).monospacedDigit()
                 .foregroundStyle(.white).frame(width: 44)
 
@@ -306,6 +370,21 @@ struct SecondScreenView: View {
         }
     }
 
+    /// Possession heat-map toggle, shown on the pitch when located plays exist.
+    @ViewBuilder private var heatToggle: some View {
+        if !center.heatPoints.isEmpty {
+            Button { center.showHeatMap.toggle() } label: {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(center.showHeatMap ? Brand.mint : .white.opacity(0.85))
+                    .padding(8)
+                    .background(.black.opacity(0.45), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(10)
+        }
+    }
+
     // MARK: Right pane (info)
 
     @ViewBuilder private var rightPane: some View {
@@ -314,38 +393,81 @@ struct SecondScreenView: View {
                            weather: center.activeWeather,
                            home: focusHome ?? Team(id: "h", name: "Home", code: "HOM"),
                            away: focusAway ?? Team(id: "a", name: "Away", code: "AWY"),
-                           isLoading: center.isLoadingDetail)
+                           isLoading: center.isLoadingDetail,
+                           temperatureUnit: center.temperatureUnit,
+                           cards: center.visibleCards,
+                           onEditLayout: { showCardEditor = true })
         } else {
             replayInfo
         }
     }
 
     private var replayInfo: some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                InfoCard(title: "Now", systemImage: "dot.radiowaves.left.and.right") {
-                    if let e = center.currentReplayEvent {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(e.playerName ?? e.typeText).font(.system(size: 16, weight: .bold))
-                            Text(e.clockText.isEmpty ? e.typeText : "\(e.clockText) · \(e.typeText)")
+        let match = center.selectedReplayMatch
+        let homeColor = match.map { Color.kit(for: tournament.team(for: $0, home: true)) } ?? .blue
+        let awayColor = match.map { Color.kit(for: tournament.team(for: $0, home: false)) } ?? .red
+        return ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 14) {
+                    InfoCard(title: "Now", systemImage: "dot.radiowaves.left.and.right") {
+                        if let p = center.currentReplayPlay {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(p.typeText).font(.system(size: 16, weight: .bold))
+                                if !p.clockText.isEmpty {
+                                    Text(p.clockText).font(.system(size: 12)).foregroundStyle(.secondary)
+                                }
+                                if let t = p.text, !t.isEmpty {
+                                    Text(t).font(.system(size: 12)).foregroundStyle(.white.opacity(0.85))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            Text("Pick a match to start the replay.")
                                 .font(.system(size: 12)).foregroundStyle(.secondary)
-                            if let t = e.text, !t.isEmpty {
-                                Text(t).font(.system(size: 12)).foregroundStyle(.white.opacity(0.85))
-                                    .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
+                    if !center.replayPlays.isEmpty {
+                        InfoCard(title: "Timeline", systemImage: "list.bullet") {
+                            VStack(spacing: 2) {
+                                ForEach(Array(center.replayPlays.enumerated()), id: \.element.id) { idx, p in
+                                    Button { center.pauseReplay(); center.replayIndex = idx } label: {
+                                        HStack(spacing: 8) {
+                                            Circle()
+                                                .fill(p.isHome == true ? homeColor : (p.isHome == false ? awayColor : Color.gray))
+                                                .frame(width: 7, height: 7)
+                                            Text(p.clockText)
+                                                .font(.system(size: 12, weight: .heavy)).monospacedDigit()
+                                                .foregroundStyle(.secondary).frame(width: 38, alignment: .leading)
+                                            Text(p.text?.isEmpty == false ? p.text! : p.typeText)
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(idx == center.replayIndex ? .white : .white.opacity(0.75))
+                                                .lineLimit(2)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                            Spacer(minLength: 0)
+                                        }
+                                        .padding(.vertical, 4).padding(.horizontal, 6)
+                                        .background(idx == center.replayIndex ? Color.white.opacity(0.12) : .clear,
+                                                    in: RoundedRectangle(cornerRadius: 6))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .id(idx)
+                                }
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Text("Pick a match to start the replay.")
+                    }
+
+                    InfoCard(title: "About replay", systemImage: "info.circle") {
+                        Text("Steps through the 2026 World Cup match (via ESPN). Players are shown by formation; the ball follows the real on-ball coordinates ESPN reports for each play, where available.")
                             .font(.system(size: 12)).foregroundStyle(.secondary)
                     }
                 }
-                InfoCard(title: "About replay", systemImage: "info.circle") {
-                    Text("Steps through the real 2026 World Cup event timeline (via ESPN). Players are shown by formation and the ball is estimated from each event — no free API provides live positional tracking.")
-                        .font(.system(size: 12)).foregroundStyle(.secondary)
-                }
+                .padding(14)
             }
-            .padding(14)
+            .onChange(of: center.replayIndex) { _, idx in
+                withAnimation { proxy.scrollTo(idx, anchor: .center) }
+            }
         }
     }
 }
@@ -356,10 +478,14 @@ struct BroadcastScoreboard: View {
     let match: Match?
     let home: Team?
     let away: Team?
+    var badgeImage: UIImage? = nil
+    /// Regulation half length in minutes (from the ESPN match format; default 45).
+    var half: Int = 45
 
-    private let pillHeight: CGFloat = 40
+    private let pillHeight: CGFloat = 52
     /// How far the clock chip's right edge slides underneath the bar.
-    private let clockTuck: CGFloat = 44
+    private let clockTuck: CGFloat = 54
+    private var regulationEnd: Int { half * 2 }   // e.g. 90
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { ctx in
@@ -392,16 +518,18 @@ struct BroadcastScoreboard: View {
             }
     }
 
-    /// The minute the clock holds at while added time shows: 45 for first-half
-    /// stoppage, 90 for second-half. nil during ordinary play (so it ticks normally).
+    /// The minute the clock holds at while added time shows — the current period's
+    /// end (half, full time, or an extra-time half end). nil during ordinary play
+    /// (incl. extra-time play before its added time), so the clock ticks normally.
     private func stoppageBoundary(_ match: Match) -> Int? {
-        if let minute = match.minute, minute > 0 {
-            if minute >= 90 { return 90 }
-            if minute >= 45 && match.stoppagePlus != nil { return 45 }
-            return nil
+        // Period ends from the format: half (45), full time (90), ET1 (105), ET2 (120).
+        let ends = [half, regulationEnd, regulationEnd + 15, regulationEnd + 30]
+        guard let minute = match.minute, minute > 0 else {
+            // Kickoff-anchored sources (demo) report no minute — hold at full time.
+            return match.stoppagePlus != nil ? regulationEnd : nil
         }
-        // Kickoff-anchored sources (demo) report no minute — fall back to the 90' mark.
-        return match.stoppagePlus != nil ? 90 : nil
+        guard match.stoppagePlus != nil else { return nil }
+        return ends.last(where: { minute >= $0 })
     }
 
     /// Seconds past the half's regulation boundary while the feed reports added time.
@@ -441,11 +569,11 @@ struct BroadcastScoreboard: View {
         // short HT/FT labels get a compact, content-sized pill instead.
         let compact = text == "HT" || text == "FT"
         return Text(text)
-            .font(.system(size: 17, weight: .black)).monospacedDigit()
+            .font(.system(size: 22, weight: .black)).monospacedDigit()
             .foregroundStyle(.black)
             .lineLimit(1).minimumScaleFactor(0.6)
-            .frame(width: compact ? nil : 64, height: pillHeight)
-            .padding(.horizontal, compact ? 14 : 0)
+            .frame(width: compact ? nil : 80, height: pillHeight)
+            .padding(.horizontal, compact ? 16 : 0)
             // Extra cream that slides underneath the bar; the digits stay clear.
             .padding(.trailing, clockTuck)
             .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Brand.cream))
@@ -463,9 +591,9 @@ struct BroadcastScoreboard: View {
         case .live:
             if match.isHalftime { return "HT" }
             guard let elapsed = match.elapsed(now: now) else { return "LIVE" }
-            // Hold at the half's boundary (45:00 or 90:00) while added time shows.
-            let cap = Double((stoppageBoundary(match) ?? 90) * 60)
-            let capped = min(elapsed, cap)
+            // Hold at the period boundary during added time; otherwise tick freely
+            // (so normal play — including extra time past 90' — counts up).
+            let capped = stoppageBoundary(match).map { min(elapsed, Double($0 * 60)) } ?? elapsed
             return String(format: "%02d:%02d", Int(capped) / 60, Int(capped) % 60)
         }
     }
@@ -502,7 +630,7 @@ struct BroadcastScoreboard: View {
         ZStack {
             HStack(spacing: 0) {
                 scoreBox(home, tuck: .trailing)
-                Color.clear.frame(width: 20, height: pillHeight)
+                Color.clear.frame(width: 24, height: pillHeight)
                 scoreBox(away, tuck: .leading)
             }
             badge
@@ -510,18 +638,20 @@ struct BroadcastScoreboard: View {
     }
 
     private func teamSide(_ team: Team, leading: Bool) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             if leading {
                 flagView(team)
-                Circle().fill(Color.kit(for: team)).frame(width: 7, height: 7)
-                Text(team.code).font(.system(size: 19, weight: .black)).foregroundStyle(.white)
+                Circle().fill(Color.kit(for: team)).frame(width: 9, height: 9)
+                    .overlay(Circle().strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
+                Text(team.code).font(.system(size: 24, weight: .black)).foregroundStyle(.white)
             } else {
-                Text(team.code).font(.system(size: 19, weight: .black)).foregroundStyle(.white)
-                Circle().fill(Color.kit(for: team)).frame(width: 7, height: 7)
+                Text(team.code).font(.system(size: 24, weight: .black)).foregroundStyle(.white)
+                Circle().fill(Color.kit(for: team)).frame(width: 9, height: 9)
+                    .overlay(Circle().strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
                 flagView(team)
             }
         }
-        .padding(.horizontal, 11)
+        .padding(.horizontal, 13)
         .frame(height: pillHeight)
     }
 
@@ -531,35 +661,47 @@ struct BroadcastScoreboard: View {
             AsyncImage(url: url) { image in
                 image.resizable().scaledToFit()
             } placeholder: {
-                Text(team.flag).font(.system(size: 18))
+                Text(team.flag).font(.system(size: 22))
             }
-            .frame(width: 26, height: 20)
+            .frame(width: 32, height: 24)
             .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
         } else {
-            Text(team.flag).font(.system(size: 18))
+            Text(team.flag).font(.system(size: 22))
         }
     }
 
-    /// The inner edge extends 14pt toward the center so the mint slides under the
-    /// badge (which draws on top); the digit stays centered in the visible 26pt.
+    /// The inner edge extends toward the center so the mint slides under the badge
+    /// (which draws on top); the digit stays centered in the visible width.
     private func scoreBox(_ score: Int?, tuck edge: Edge.Set) -> some View {
         Text(score.map(String.init) ?? "–")
-            .font(.system(size: 20, weight: .black)).monospacedDigit()
+            .font(.system(size: 26, weight: .black)).monospacedDigit()
             .foregroundStyle(.black)
-            .frame(width: 26, height: pillHeight - 4)
-            .padding(edge, 14)
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Brand.mint))
+            .frame(width: 32, height: pillHeight - 4)
+            .padding(edge, 16)
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Brand.mint))
     }
 
     private var badge: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Brand.barBlack)
-            Image("WC26Badge")
-                .resizable()
-                .scaledToFit()
-                .padding(1)
+            if let badgeImage {
+                Image(uiImage: badgeImage)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(1)
+            } else {
+                // Neutral fallback — the app ships no trademarked emblem.
+                VStack(spacing: 1) {
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(Brand.mint)
+                    Text("WC 26")
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundStyle(.white)
+                }
+            }
         }
-        .frame(width: 40, height: pillHeight + 10)
+        .frame(width: 50, height: pillHeight + 12)
         .shadow(color: .black.opacity(0.4), radius: 3)
     }
 }

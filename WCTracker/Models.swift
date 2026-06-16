@@ -223,6 +223,10 @@ struct Match: Identifiable {
     /// Team flag/crest image URLs from the live feed (ESPN `team.logo`).
     var homeLogoURL: URL? = nil
     var awayLogoURL: URL? = nil
+    /// Total elapsed match seconds reported by the feed at `fetchedAt` (ESPN
+    /// `status.clock`, or minute+added-time when in stoppage). Anchors the clock to
+    /// the *actual* time so it doesn't restart from the minute boundary on launch.
+    var clockSeconds: Double? = nil
 
     /// Live = kicked off, not flagged finished, and within a 135-minute window
     /// so stale data can't keep a "live" match on screen forever.
@@ -261,10 +265,12 @@ struct Match: Identifiable {
     }
 
     func elapsed(now: Date = Date()) -> TimeInterval? {
-        // Anchor on the feed-reported minute when available so the clock matches
-        // the broadcast clock, ticking forward from the moment we fetched it.
+        // Anchor on the actual elapsed seconds the feed reported (clockSeconds), or
+        // the minute + running added time, ticking forward from when we fetched it —
+        // so the clock and the added-time count start at the real value, not zero.
         if let minute, minute > 0 {
-            return Double(minute) * 60 + (fetchedAt.map { now.timeIntervalSince($0) } ?? 0)
+            let base = clockSeconds ?? Double(minute + (stoppagePlus ?? 0)) * 60
+            return base + (fetchedAt.map { now.timeIntervalSince($0) } ?? 0)
         }
         guard let d = date, now >= d else { return nil }
         return now.timeIntervalSince(d)

@@ -32,7 +32,7 @@ actor MatchSummaryService {
     private let base: String
     private let session = APIConfig.makeSession()
     private var cache: [String: (at: Date, detail: MatchDetail)] = [:]
-    private let ttl: TimeInterval = 8
+    private let ttl: TimeInterval = 3
 
     init(base: String = APIConfig.espnBase) { self.base = base }
 
@@ -76,7 +76,11 @@ final class MatchWeatherService {
     // MARK: Geocoding (Open-Meteo — no key, feeds both weather providers)
 
     private func coordinates(for venue: VenueInfo) async -> CLLocationCoordinate2D? {
-        guard let name = venue.city ?? venue.name,
+        // ESPN sometimes packs state into the city ("Inglewood, California"); the
+        // Open-Meteo geocoder wants a bare city name, so use the part before the comma.
+        let raw = venue.city ?? venue.name
+        guard let name = raw?.components(separatedBy: ",").first?.trimmingCharacters(in: .whitespaces),
+              !name.isEmpty,
               let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://geocoding-api.open-meteo.com/v1/search?name=\(encoded)&count=1&language=en&format=json"),
               let json = try? await APIConfig.json(from: url, session: session),

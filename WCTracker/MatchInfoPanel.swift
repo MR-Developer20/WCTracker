@@ -7,6 +7,9 @@ struct MatchInfoPanel: View {
     let home: Team
     let away: Team
     var isLoading: Bool
+    var temperatureUnit: TemperatureUnit = .celsius
+    var cards: [InfoCardKind] = InfoCardKind.allCases
+    var onEditLayout: () -> Void = {}
 
     var body: some View {
         ScrollView {
@@ -16,14 +19,161 @@ struct MatchInfoPanel: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 40)
                 }
-                goalsCard
-                statsCard
-                stadiumCard
-                weatherCard
-                eventsCard
+                ForEach(cards) { cardView($0) }
+
+                Button { onEditLayout() } label: {
+                    Label("Customize Cards", systemImage: "slider.horizontal.3")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.85))
+                .padding(.top, 2)
             }
             .padding(14)
         }
+    }
+
+    @ViewBuilder private func cardView(_ kind: InfoCardKind) -> some View {
+        switch kind {
+        case .goals: goalsCard
+        case .teamStats: statsCard
+        case .stadium: stadiumCard
+        case .officials: officialsCard
+        case .weather: weatherCard
+        case .events: eventsCard
+        case .leaders: leadersCard
+        case .broadcasts: broadcastsCard
+        case .news: newsCard
+        case .videos: videosCard
+        }
+    }
+
+    // MARK: Leaders
+
+    private var leadersCard: some View {
+        InfoCard(title: "Leaders", systemImage: "star.circle") {
+            let leaders = detail?.leaders ?? []
+            if leaders.isEmpty {
+                EmptyHint("No leaders available")
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(leaders) { team in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(team.code)
+                                .font(.system(size: 12, weight: .heavy))
+                                .foregroundStyle(team.isHome ? Color.kit(for: home) : Color.kit(for: away))
+                            ForEach(team.entries) { e in
+                                HStack(spacing: 6) {
+                                    Text(e.category).font(.system(size: 12)).foregroundStyle(.secondary)
+                                    Spacer(minLength: 4)
+                                    Text(e.player).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                                    Text(e.value).font(.system(size: 12, weight: .heavy)).monospacedDigit()
+                                        .foregroundStyle(.white).frame(minWidth: 24, alignment: .trailing)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: Broadcasts
+
+    private var broadcastsCard: some View {
+        InfoCard(title: "Where to Watch", systemImage: "tv") {
+            let casts = detail?.broadcasts ?? []
+            if casts.isEmpty {
+                EmptyHint("No broadcast info")
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(casts) { b in
+                        HStack(spacing: 8) {
+                            Image(systemName: b.kind.lowercased().contains("stream") ? "play.tv" : "tv")
+                                .font(.system(size: 13)).foregroundStyle(.secondary).frame(width: 20)
+                            Text(b.name).font(.system(size: 14, weight: .semibold))
+                            Spacer()
+                            Text(b.kind).font(.system(size: 11)).foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: News
+
+    private var newsCard: some View {
+        InfoCard(title: "News", systemImage: "newspaper") {
+            let items = detail?.articles ?? []
+            if items.isEmpty {
+                EmptyHint("No news")
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(items) { item in
+                        linkRow(item.headline, url: item.url, systemImage: "doc.text")
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: Videos
+
+    private var videosCard: some View {
+        InfoCard(title: "Videos", systemImage: "play.rectangle") {
+            let items = detail?.videos ?? []
+            if items.isEmpty {
+                EmptyHint("No videos")
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(items) { v in
+                        videoRow(v)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func videoRow(_ v: VideoItem) -> some View {
+        let row = HStack(spacing: 10) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6).fill(Brand.barBlack)
+                if let thumb = v.thumbnail {
+                    AsyncImage(url: thumb) { $0.resizable().scaledToFill() } placeholder: { Color.clear }
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                Image(systemName: "play.circle.fill").font(.system(size: 18)).foregroundStyle(.white.opacity(0.9))
+            }
+            .frame(width: 64, height: 38)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(v.headline).font(.system(size: 12, weight: .semibold)).lineLimit(2)
+                if let d = v.duration {
+                    Text(String(format: "%d:%02d", d / 60, d % 60))
+                        .font(.system(size: 11)).foregroundStyle(.secondary).monospacedDigit()
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        if let url = v.url {
+            Link(destination: url) { row }.buttonStyle(.plain)
+        } else {
+            row
+        }
+    }
+
+    @ViewBuilder private func linkRow(_ text: String, url: URL?, systemImage: String) -> some View {
+        let row = HStack(alignment: .top, spacing: 8) {
+            Image(systemName: systemImage).font(.system(size: 12)).foregroundStyle(.secondary).frame(width: 18)
+            Text(text).font(.system(size: 13)).foregroundStyle(.white.opacity(0.9))
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            if url != nil { Image(systemName: "arrow.up.right").font(.system(size: 10)).foregroundStyle(.tertiary) }
+        }
+        if let url { Link(destination: url) { row }.buttonStyle(.plain) } else { row }
     }
 
     // MARK: Goals
@@ -37,18 +187,18 @@ struct MatchInfoPanel: View {
                 VStack(spacing: 8) {
                     ForEach(goals) { goal in
                         HStack(spacing: 8) {
-                            Text((goal.isHome ? home : away).flag)
+                            Text((goal.isHome ? home : away).flag).font(.system(size: 17))
                             Text(goal.clockText.isEmpty ? "" : goal.clockText)
-                                .font(.system(size: 12, weight: .heavy)).monospacedDigit()
-                                .foregroundStyle(.secondary).frame(width: 34, alignment: .leading)
+                                .font(.system(size: 14, weight: .heavy)).monospacedDigit()
+                                .foregroundStyle(.secondary).frame(width: 38, alignment: .leading)
                             VStack(alignment: .leading, spacing: 1) {
                                 HStack(spacing: 4) {
-                                    Text(goal.scorer).font(.system(size: 13, weight: .semibold))
+                                    Text(goal.scorer).font(.system(size: 15, weight: .semibold))
                                     if goal.isPenalty { tag("PEN") }
                                     if goal.isOwnGoal { tag("OG") }
                                 }
                                 if let assist = goal.assist {
-                                    Text("assist: \(assist)").font(.system(size: 11)).foregroundStyle(.secondary)
+                                    Text("assist: \(assist)").font(.system(size: 12)).foregroundStyle(.secondary)
                                 }
                             }
                             Spacer(minLength: 0)
@@ -77,9 +227,9 @@ struct MatchInfoPanel: View {
             let stats = detail?.stats ?? []
             VStack(spacing: 12) {
                 HStack {
-                    Text(home.code).font(.system(size: 12, weight: .heavy)).foregroundStyle(Color.kit(for: home))
+                    Text(home.code).font(.system(size: 14, weight: .heavy)).foregroundStyle(Color.kit(for: home))
                     Spacer()
-                    Text(away.code).font(.system(size: 12, weight: .heavy)).foregroundStyle(Color.kit(for: away))
+                    Text(away.code).font(.system(size: 14, weight: .heavy)).foregroundStyle(Color.kit(for: away))
                 }
                 formationRow
                 if stats.isEmpty {
@@ -99,11 +249,11 @@ struct MatchInfoPanel: View {
         let awayF = detail?.awayLineup?.formation
         if homeF != nil || awayF != nil {
             HStack {
-                Text(homeF ?? "—").font(.system(size: 13, weight: .heavy)).monospacedDigit()
+                Text(homeF ?? "—").font(.system(size: 15, weight: .heavy)).monospacedDigit()
                 Spacer()
-                Text("Formation").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Formation").font(.system(size: 13)).foregroundStyle(.secondary)
                 Spacer()
-                Text(awayF ?? "—").font(.system(size: 13, weight: .heavy)).monospacedDigit()
+                Text(awayF ?? "—").font(.system(size: 15, weight: .heavy)).monospacedDigit()
             }
         }
     }
@@ -113,23 +263,55 @@ struct MatchInfoPanel: View {
     private var stadiumCard: some View {
         InfoCard(title: "Stadium", systemImage: "sportscourt") {
             if let venue = detail?.venue, venue.name != nil || !venue.locationLine.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 5) {
                     if let name = venue.name {
-                        Text(name).font(.system(size: 15, weight: .bold))
+                        Text(name).font(.system(size: 17, weight: .bold))
                     }
                     if !venue.locationLine.isEmpty {
                         Label(venue.locationLine, systemImage: "mappin.and.ellipse")
-                            .font(.system(size: 12)).foregroundStyle(.secondary)
+                            .font(.system(size: 13)).foregroundStyle(.secondary)
                     }
                     if let attendance = venue.attendance {
                         Label("\(attendance.formatted()) attendance", systemImage: "person.3.fill")
-                            .font(.system(size: 12)).foregroundStyle(.secondary)
+                            .font(.system(size: 13)).foregroundStyle(.secondary)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 EmptyHint("No venue data")
             }
+        }
+    }
+
+    // MARK: Officials & format
+
+    private var officialsCard: some View {
+        InfoCard(title: "Officials", systemImage: "whistle") {
+            let officials = detail?.officials ?? []
+            VStack(alignment: .leading, spacing: 6) {
+                if officials.isEmpty {
+                    EmptyHint("No officials listed")
+                } else {
+                    ForEach(officials) { o in
+                        HStack {
+                            Text(o.name).font(.system(size: 14, weight: .semibold))
+                            Spacer()
+                            Text(o.role).font(.system(size: 12)).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                if let format = detail?.format {
+                    Divider().overlay(.white.opacity(0.1))
+                    HStack {
+                        Label("Format", systemImage: "clock")
+                            .font(.system(size: 12)).foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(format.summary) (\(format.regulationMinutes)′)")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -141,23 +323,23 @@ struct MatchInfoPanel: View {
                 HStack(spacing: 14) {
                     Image(systemName: weather.symbolName)
                         .symbolRenderingMode(.multicolor)
-                        .font(.system(size: 34))
+                        .font(.system(size: 40))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(weather.temperatureText).font(.system(size: 26, weight: .heavy))
-                        Text(weather.condition).font(.system(size: 13)).foregroundStyle(.secondary)
+                        Text(temperatureUnit.display(celsius: weather.temperatureC)).font(.system(size: 30, weight: .heavy))
+                        Text(weather.condition).font(.system(size: 14)).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    VStack(alignment: .trailing, spacing: 4) {
+                    VStack(alignment: .trailing, spacing: 5) {
                         if let wind = weather.windKph {
                             Label("\(Int(wind.rounded())) km/h", systemImage: "wind")
-                                .font(.system(size: 11)).foregroundStyle(.secondary)
+                                .font(.system(size: 12)).foregroundStyle(.secondary)
                         }
                         if let humidity = weather.humidity {
                             Label("\(humidity)%", systemImage: "humidity")
-                                .font(.system(size: 11)).foregroundStyle(.secondary)
+                                .font(.system(size: 12)).foregroundStyle(.secondary)
                         }
                         Text("via \(weather.source.rawValue)")
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(.tertiary)
                     }
                 }
@@ -179,14 +361,14 @@ struct MatchInfoPanel: View {
                     ForEach(events.reversed()) { event in
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: icon(for: event.kind))
-                                .font(.system(size: 12))
+                                .font(.system(size: 13))
                                 .foregroundStyle(color(for: event.kind))
                                 .frame(width: 18)
                             Text(event.clockText)
-                                .font(.system(size: 11, weight: .heavy)).monospacedDigit()
-                                .foregroundStyle(.secondary).frame(width: 34, alignment: .leading)
+                                .font(.system(size: 13, weight: .heavy)).monospacedDigit()
+                                .foregroundStyle(.secondary).frame(width: 38, alignment: .leading)
                             Text(event.text?.isEmpty == false ? event.text! : event.typeText)
-                                .font(.system(size: 11))
+                                .font(.system(size: 13))
                                 .foregroundStyle(.primary.opacity(0.9))
                                 .fixedSize(horizontal: false, vertical: true)
                             Spacer(minLength: 0)
@@ -230,13 +412,13 @@ private struct StatBar: View {
     let awayColor: Color
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             HStack {
-                Text(stat.homeText).font(.system(size: 12, weight: .bold)).monospacedDigit()
+                Text(stat.homeText).font(.system(size: 14, weight: .bold)).monospacedDigit()
                 Spacer()
-                Text(stat.label).font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(stat.label).font(.system(size: 13)).foregroundStyle(.secondary)
                 Spacer()
-                Text(stat.awayText).font(.system(size: 12, weight: .bold)).monospacedDigit()
+                Text(stat.awayText).font(.system(size: 14, weight: .bold)).monospacedDigit()
             }
             GeometryReader { geo in
                 let frac = homeFraction
@@ -245,7 +427,7 @@ private struct StatBar: View {
                     Capsule().fill(awayColor)
                 }
             }
-            .frame(height: 5)
+            .frame(height: 6)
         }
     }
 
@@ -266,11 +448,11 @@ struct InfoCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label(title, systemImage: systemImage)
-                .font(.system(size: 13, weight: .heavy))
+                .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(.white.opacity(0.9))
             content
         }
-        .padding(14)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.10), lineWidth: 1))

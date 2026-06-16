@@ -84,8 +84,17 @@ enum ESPNParser {
                 venueName: comp.field(["venue"])?.string("fullName"),
                 stoppagePlus: isLive ? plus : nil
             )
-            // Anchor the live clock so the minute ticks between polls.
-            if isLive { match.fetchedAt = fetchedAt }
+            // Anchor the live clock to the actual elapsed seconds so it ticks from
+            // the real time (not the minute boundary). In stoppage ESPN caps
+            // status.clock at the half boundary, so use minute+added there instead.
+            if isLive {
+                match.fetchedAt = fetchedAt
+                if let plus, let minute {
+                    match.clockSeconds = Double(minute + plus) * 60
+                } else {
+                    match.clockSeconds = status?.field(["clock"])?.doubleValue ?? minute.map { Double($0) * 60 }
+                }
+            }
             match.isHalftime = isHalftime
             // Team kit colors live on the scoreboard feed (the standings endpoint omits them).
             match.homeColorHex = home.field(["team"])?.string("color")

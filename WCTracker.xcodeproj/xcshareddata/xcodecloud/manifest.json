@@ -1,0 +1,9 @@
+{
+  "id" : "c8282ea4-95a3-42e3-a72e-dd3bf9d62240",
+  "targets" : [
+    {
+      "id" : "e863c9fa-c81d-4bf7-a2a1-56c2aaded568",
+      "name" : "WCTracker"
+    }
+  ]
+}

@@ -82,31 +82,86 @@ enum DemoData {
         teamId: homeTeamId, name: "France", code: "FRA", colorHex: homeColorHex,
         formation: "4-3-3", isHome: true,
         starters: PitchLayout.place([
-            raw("16", "Maignan", "G"),
-            raw("2", "Koundé", "RB"), raw("17", "Saliba", "CD-R"),
-            raw("4", "Upamecano", "CD-L"), raw("22", "T. Hernández", "LB"),
-            raw("8", "Tchouaméni", "DM"), raw("7", "Griezmann", "CM-R"),
-            raw("6", "Camavinga", "CM-L"),
-            raw("11", "Dembélé", "RW"), raw("10", "Mbappé", "F"), raw("20", "Barcola", "LW"),
-        ], isHome: true),
+            raw("16", "Maignan", "G", headshot: 159382),
+            raw("2", "Koundé", "RB", headshot: 184221), raw("17", "Saliba", "CD-R", headshot: 188160),
+            raw("4", "Upamecano", "CD-L", headshot: 202501), raw("22", "T. Hernández", "LB", headshot: 213248),
+            raw("8", "Tchouaméni", "DM", headshot: 213718), raw("7", "Griezmann", "CM-R", headshot: 216617),
+            raw("6", "Camavinga", "CM-L", headshot: 219627),
+            raw("11", "Dembélé", "RW", headshot: 222776), raw("10", "Mbappé", "F", headshot: 228619), raw("20", "Barcola", "LW", headshot: 230626),
+        ], isHome: true, formation: "4-3-3"),
         substitutes: [])
 
     private static let awayLineup = Lineup(
         teamId: awayTeamId, name: "Senegal", code: "SEN", colorHex: awayColorHex,
         formation: "4-3-3", isHome: false,
         starters: PitchLayout.place([
-            raw("16", "E. Mendy", "G"),
-            raw("22", "Sabaly", "RB"), raw("3", "Koulibaly", "CD-R"),
-            raw("21", "A. Diallo", "CD-L"), raw("12", "Jakobs", "LB"),
-            raw("6", "N. Mendy", "DM"), raw("5", "Gueye", "CM-R"),
-            raw("17", "P. Sarr", "CM-L"),
-            raw("18", "I. Sarr", "RW"), raw("9", "Dia", "F"), raw("10", "Mané", "LW"),
-        ], isHome: false),
+            raw("16", "E. Mendy", "G", headshot: 231059),
+            raw("22", "Sabaly", "RB", headshot: 236721), raw("3", "Koulibaly", "CD-R", headshot: 236890),
+            raw("21", "A. Diallo", "CD-L", headshot: 238016), raw("12", "Jakobs", "LB", headshot: 238033),
+            raw("6", "N. Mendy", "DM", headshot: 238712), raw("5", "Gueye", "CM-R", headshot: 239350),
+            raw("17", "P. Sarr", "CM-L", headshot: 240965),
+            raw("18", "I. Sarr", "RW", headshot: 241627), raw("9", "Dia", "F", subbedOut: true, headshot: 248276), raw("10", "Mané", "LW", headshot: 249524),
+        ], isHome: false, formation: "4-3-3"),
         substitutes: [])
 
-    private static func raw(_ number: String, _ name: String, _ abbr: String) -> PitchLayout.RawPlayer {
-        // shortName "X. Lastname" → keep as given; id from number+name.
-        PitchLayout.RawPlayer(id: "\(name)-\(number)", name: name, shortName: name, number: number, abbr: abbr)
+    private static func raw(_ number: String, _ name: String, _ abbr: String,
+                            subbedOut: Bool = false, headshot: Int? = nil) -> PitchLayout.RawPlayer {
+        // shortName "X. Lastname" → keep as given; id from number+name. Demo players
+        // carry sample per-position stats so the tap-a-player card is populated in
+        // demo mode just like it is from the live feed. ESPN has no headshots for
+        // these specific players, so the demo uses real (unrelated) ESPN soccer
+        // headshots purely to populate the headshot feature.
+        PitchLayout.RawPlayer(id: "\(name)-\(number)", name: name, shortName: name,
+                              number: number, abbr: abbr,
+                              headshotURL: headshot.flatMap { URL(string: "https://a.espncdn.com/i/headshots/soccer/players/full/\($0).png") },
+                              subbedOut: subbedOut,
+                              stats: sampleStats(number: number, abbr: abbr, name: name))
+    }
+
+    /// Plausible, position-specific match stats seeded by the jersey number so each
+    /// player differs deterministically. Known demo scorers get a goal so the card
+    /// agrees with the goals list. Labels are unique per player (PlayerStat.id = label).
+    private static let demoScorers: Set<String> = ["Mbappé", "Griezmann", "I. Sarr"]
+
+    private static func sampleStats(number: String, abbr: String, name: String) -> [PlayerStat] {
+        let n = Int(number) ?? 9
+        // deterministic spread in 0...span from the jersey number
+        func r(_ base: Int, _ span: Int) -> Int { base + (n * 17 + 7) % (span + 1) }
+        func s(_ name: String, _ label: String, _ value: Int) -> PlayerStat {
+            PlayerStat(label: label, name: name, value: "\(value)")
+        }
+        let rating = PlayerStat(label: "RAT", name: "Rating",
+                                value: String(format: "%.1f", 6.4 + Double((n * 13) % 26) / 10.0))
+        let minutes = s("Minutes", "MIN", 90)
+
+        if abbr == "G" {
+            return [s("Saves", "SV", r(2, 4)), s("Goals Conceded", "GC", r(0, 2)),
+                    s("Passes", "PAS", r(20, 18)),
+                    PlayerStat(label: "PA%", name: "Pass Accuracy", value: "\(r(76, 18))%"),
+                    minutes, rating]
+        }
+
+        let scored = demoScorers.contains(name)
+        let isDef = abbr.hasSuffix("B") || abbr.hasPrefix("CD")
+        let isFwd = abbr == "F" || abbr == "RW" || abbr == "LW"
+        let goals = s("Goals", "G", scored ? 1 : (isFwd ? r(0, 1) : 0))
+
+        if isDef {
+            return [s("Tackles", "TKL", r(1, 4)), s("Interceptions", "INT", r(0, 3)),
+                    s("Clearances", "CLR", r(1, 5)), s("Passes", "PAS", r(40, 35)),
+                    PlayerStat(label: "PA%", name: "Pass Accuracy", value: "\(r(82, 14))%"),
+                    goals, minutes, rating]
+        }
+        if isFwd {
+            return [goals, s("Shots", "SH", r(1, 4)), s("Shots on Target", "SOT", r(0, 3)),
+                    s("Key Passes", "KP", r(0, 3)), s("Touches", "TCH", r(28, 30)),
+                    minutes, rating]
+        }
+        // midfield
+        return [goals, s("Passes", "PAS", r(45, 40)),
+                PlayerStat(label: "PA%", name: "Pass Accuracy", value: "\(r(80, 16))%"),
+                s("Key Passes", "KP", r(0, 3)), s("Tackles", "TKL", r(1, 4)),
+                s("Duels Won", "DW", r(3, 8)), minutes, rating]
     }
 
     // MARK: Goals + events
