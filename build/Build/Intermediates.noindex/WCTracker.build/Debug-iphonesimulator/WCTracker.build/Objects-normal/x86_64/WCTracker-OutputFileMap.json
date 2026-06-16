@@ -1,0 +1,149 @@
+{
+  "" : {
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTracker-primary.dia",
+    "emit-module-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTracker-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTracker-primary-emit-module.dia",
+    "pch" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTracker-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTracker-primary.swiftdeps"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/DemoData.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/DemoData~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/ESPNClient.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/ESPNClient~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/MatchCenterServices.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterServices~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/MatchCenterStore.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchCenterStore~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/MatchDetail.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchDetail~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/MatchInfoPanel.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/MatchInfoPanel~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/Models.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Models~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/PitchView.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/PitchView~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/SecondScreenView.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SecondScreenView~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/SettingsView.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/Theme.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/Theme~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/TournamentStore.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/TournamentStore~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/WCTracker/WCTrackerApp.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/WCTrackerApp~partial.swiftmodule"
+  },
+  "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/markrubert/Aifolder/WCTracker/build/Build/Intermediates.noindex/WCTracker.build/Debug-iphonesimulator/WCTracker.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "wc26badge.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

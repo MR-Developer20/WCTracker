@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>13</integer>
+	<key>logs</key>
+	<dict>
+		<key>29DC8659-C064-4B39-AB8F-BFC1B39283EF</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>29DC8659-C064-4B39-AB8F-BFC1B39283EF.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>WCTracker project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>WCTracker</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project WCTracker with scheme WCTracker</string>
+			<key>timeStartedRecording</key>
+			<real>803216112.66523898</real>
+			<key>timeStoppedRecording</key>
+			<real>803216115.67514706</real>
+			<key>title</key>
+			<string>Building project WCTracker with scheme WCTracker</string>
+			<key>uniqueIdentifier</key>
+			<string>29DC8659-C064-4B39-AB8F-BFC1B39283EF</string>
+		</dict>
+		<key>B2779A8B-2293-4E9D-8A58-26DAD1795FC5</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>B2779A8B-2293-4E9D-8A58-26DAD1795FC5.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>W</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>1</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>WCTracker project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>WCTracker</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project WCTracker with scheme WCTracker</string>
+			<key>timeStartedRecording</key>
+			<real>803215933.58837104</real>
+			<key>timeStoppedRecording</key>
+			<real>803215938.18138897</real>
+			<key>title</key>
+			<string>Building project WCTracker with scheme WCTracker</string>
+			<key>uniqueIdentifier</key>
+			<string>B2779A8B-2293-4E9D-8A58-26DAD1795FC5</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
