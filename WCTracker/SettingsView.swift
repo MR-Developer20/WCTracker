@@ -53,6 +53,14 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Toggle("Accurate match minute", isOn: $store.useBroadcastClock)
+                } header: {
+                    Text("Scoreboard Clock")
+                } footer: {
+                    Text("On: shows the broadcast's minute exactly as the feed reports it (e.g. 37', 45'+2'), guaranteed to match the TV. Off: shows a running MM:SS clock — smoother, but the seconds are estimated since the feed only reports whole minutes.")
+                }
+
+                Section {
                     let hasBadge = store.badgeImage != nil
                     HStack(spacing: 14) {
                         imagePreview(store.badgeImage, fallback: "trophy.fill")

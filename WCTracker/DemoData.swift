@@ -53,6 +53,11 @@ enum DemoData {
         m.isHalftime = scene.isHalftime
         m.stoppagePlus = scene.stoppagePlus
         m.announcedAddedTime = scene.announcedAddedTime
+        // Broadcast-style minute string, so the "match minute" clock toggle has data
+        // in demo mode too ("30'", "45'+2'", "90'+5'").
+        if !scene.finished && scene.minute > 0 {
+            m.displayClock = scene.stoppagePlus.map { "\(scene.minute)'+\($0)'" } ?? "\(scene.minute)'"
+        }
         return m
     }
 

@@ -93,7 +93,8 @@ struct SecondScreenView: View {
                     BroadcastScoreboard(match: match,
                                         home: focusHome, away: focusAway,
                                         badgeImage: center.badgeImage,
-                                        half: center.activeDetail?.format?.halfMinutes ?? 45)
+                                        half: center.activeDetail?.format?.halfMinutes ?? 45,
+                                        broadcastClock: center.useBroadcastClock)
                         .scaleEffect(scoreboardScale)
                 }
             } else if let m = center.selectedReplayMatch {
@@ -101,7 +102,8 @@ struct SecondScreenView: View {
                                     home: tournament.team(for: m, home: true),
                                     away: tournament.team(for: m, home: false),
                                     badgeImage: center.badgeImage,
-                                    half: center.replayDetail?.format?.halfMinutes ?? 45)
+                                    half: center.replayDetail?.format?.halfMinutes ?? 45,
+                                    broadcastClock: center.useBroadcastClock)
                     .scaleEffect(scoreboardScale)
             } else {
                 Text("Replay — pick a 2026 match")
@@ -482,6 +484,8 @@ struct BroadcastScoreboard: View {
     var badgeImage: UIImage? = nil
     /// Regulation half length in minutes (from the ESPN match format; default 45).
     var half: Int = 45
+    /// Show ESPN's exact broadcast minute ("37'", "45'+2'") instead of synthesized MM:SS.
+    var broadcastClock: Bool = false
 
     private let pillHeight: CGFloat = 52
     /// How far the clock chip's right edge slides underneath the bar.
@@ -511,7 +515,9 @@ struct BroadcastScoreboard: View {
     private func clockColumn(_ match: Match, now: Date) -> some View {
         clockChip(match, now: now)
             .overlay(alignment: .bottomLeading) {
-                if let over = stoppageElapsed(match, now: now) {
+                // The broadcast-minute string already carries "+N", so the stoppage
+                // sub-chip is only used by the running MM:SS clock.
+                if !broadcastClock, let over = stoppageElapsed(match, now: now) {
                     stoppageChip(over: over, plus: match.announcedAddedTime)
                         .fixedSize()
                         .offset(y: 30)
@@ -567,8 +573,8 @@ struct BroadcastScoreboard: View {
     private func clockChip(_ match: Match, now: Date) -> some View {
         let text = clockText(match, now: now)
         // Fixed width for the running clock so it doesn't jiggle each second; the
-        // short HT/FT labels get a compact, content-sized pill instead.
-        let compact = text == "HT" || text == "FT"
+        // short HT/FT labels and the broadcast-minute string get a content-sized pill.
+        let compact = broadcastClock || text == "HT" || text == "FT"
         return Text(text)
             .font(.system(size: 22, weight: .black)).monospacedDigit()
             .foregroundStyle(.black)
@@ -591,6 +597,8 @@ struct BroadcastScoreboard: View {
             return df.string(from: date)
         case .live:
             if match.isHalftime { return "HT" }
+            // Exact broadcast minute ("37'", "45'+2'") when the user prefers it.
+            if broadcastClock, let dc = match.displayClock, !dc.isEmpty { return dc }
             guard let elapsed = match.elapsed(now: now) else { return "LIVE" }
             // Hold at the period boundary during added time; otherwise tick freely
             // (so normal play — including extra time past 90' — counts up).

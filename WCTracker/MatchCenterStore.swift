@@ -22,6 +22,7 @@ final class MatchCenterStore: ObservableObject {
         static let badge = "badgeImageData"
         static let ball = "ballImageData"
         static let backgroundColor = "backgroundColorHex"
+        static let clock = "useBroadcastClock"
     }
 
     // Live mode
@@ -61,6 +62,19 @@ final class MatchCenterStore: ObservableObject {
     /// Temperature unit for the weather card (°C / °F).
     @Published var temperatureUnit: TemperatureUnit {
         didSet { UserDefaults.standard.set(temperatureUnit.rawValue, forKey: "temperatureUnit") }
+    }
+
+    /// Show ESPN's exact broadcast minute ("37'", "45'+2'") instead of the synthesized
+    /// running MM:SS clock. The feed's time is minute-granular, so this is guaranteed to
+    /// match the broadcast; off by default to keep the running-clock scorebug look.
+    /// Synced via iCloud, mirrored locally.
+    @Published var useBroadcastClock: Bool {
+        didSet {
+            guard !applyingCloudChange else { return }
+            cloud.set(useBroadcastClock, forKey: CloudKey.clock)
+            cloud.synchronize()
+            UserDefaults.standard.set(useBroadcastClock, forKey: CloudKey.clock)
+        }
     }
 
     /// The app's full-screen background color, stored as a 6-digit hex string.
@@ -216,6 +230,9 @@ final class MatchCenterStore: ObservableObject {
             ?? UserDefaults.standard.string(forKey: CloudKey.backgroundColor) ?? "000000"
         self.temperatureUnit = UserDefaults.standard.string(forKey: "temperatureUnit")
             .flatMap(TemperatureUnit.init(rawValue:)) ?? .celsius
+        self.useBroadcastClock = (cloud.object(forKey: CloudKey.clock) != nil)
+            ? cloud.bool(forKey: CloudKey.clock)
+            : UserDefaults.standard.bool(forKey: CloudKey.clock)
         self.demoMode = UserDefaults.standard.bool(forKey: "demoMode")
             || CommandLine.arguments.contains("--demo")
         // Card order: saved order (iCloud first, then the local mirror), with any
@@ -268,6 +285,9 @@ final class MatchCenterStore: ObservableObject {
         if cloud.string(forKey: CloudKey.backgroundColor) == nil {
             cloud.set(backgroundColorHex, forKey: CloudKey.backgroundColor)
         }
+        if cloud.object(forKey: CloudKey.clock) == nil {
+            cloud.set(useBroadcastClock, forKey: CloudKey.clock)
+        }
         if cloud.data(forKey: CloudKey.badge) == nil, let b = badgeImage {
             storeImage(b, cloudKey: CloudKey.badge, fileName: "badge.png")
         }
@@ -295,6 +315,7 @@ final class MatchCenterStore: ObservableObject {
             hiddenCards = Set(raw.compactMap(InfoCardKind.init(rawValue:)))
         }
         if let hex = cloud.string(forKey: CloudKey.backgroundColor) { backgroundColorHex = hex }
+        if cloud.object(forKey: CloudKey.clock) != nil { useBroadcastClock = cloud.bool(forKey: CloudKey.clock) }
         if let data = cloud.data(forKey: CloudKey.badge) { badgeImage = UIImage(data: data) }
         if let data = cloud.data(forKey: CloudKey.ball) { ballImage = UIImage(data: data) }
     }

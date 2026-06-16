@@ -227,6 +227,9 @@ struct Match: Identifiable {
     /// `status.clock`, or minute+added-time when in stoppage). Anchors the clock to
     /// the *actual* time so it doesn't restart from the minute boundary on launch.
     var clockSeconds: Double? = nil
+    /// ESPN's raw broadcast clock string ("37'", "45'+2'", "90'+3'") — shown verbatim
+    /// when the user prefers the exact match minute over the synthesized MM:SS clock.
+    var displayClock: String? = nil
 
     /// Live = kicked off, not flagged finished, and within a 135-minute window
     /// so stale data can't keep a "live" match on screen forever.
@@ -269,7 +272,9 @@ struct Match: Identifiable {
         // the minute + running added time, ticking forward from when we fetched it —
         // so the clock and the added-time count start at the real value, not zero.
         if let minute, minute > 0 {
-            let base = clockSeconds ?? Double(minute + (stoppagePlus ?? 0)) * 60
+            // minute-1: displayClock counts the minute in progress ("37'" = 36:00–
+            // 36:59), so the running clock starts at the beginning of it (see ESPNParser).
+            let base = clockSeconds ?? Double(minute + (stoppagePlus ?? 0) - 1) * 60
             return base + (fetchedAt.map { now.timeIntervalSince($0) } ?? 0)
         }
         guard let d = date, now >= d else { return nil }

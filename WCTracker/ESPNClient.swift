@@ -84,15 +84,19 @@ enum ESPNParser {
                 venueName: comp.field(["venue"])?.string("fullName"),
                 stoppagePlus: isLive ? plus : nil
             )
-            // Anchor the live clock to the actual elapsed seconds so it ticks from
-            // the real time (not the minute boundary). In stoppage ESPN caps
-            // status.clock at the half boundary, so use minute+added there instead.
+            // Anchor the live clock to the real running time. ESPN's displayClock is
+            // the minute *in progress* ("37'" = elapsed 36:00–36:59; kickoff shows
+            // "1'") and status.clock is quantized to that whole minute ("37'" → 2220s,
+            // not real seconds) — both sit ~a minute ahead of the running clock. So
+            // anchor at the *start* of the minute (minute-1) and let the view tick the
+            // seconds; the store re-anchors at each minute flip, keeping it accurate.
             if isLive {
                 match.fetchedAt = fetchedAt
-                if let plus, let minute {
-                    match.clockSeconds = Double(minute + plus) * 60
+                match.displayClock = displayClock
+                if let minute, minute > 0 {
+                    match.clockSeconds = Double(minute + (plus ?? 0) - 1) * 60
                 } else {
-                    match.clockSeconds = status?.field(["clock"])?.doubleValue ?? minute.map { Double($0) * 60 }
+                    match.clockSeconds = status?.field(["clock"])?.doubleValue
                 }
             }
             match.isHalftime = isHalftime
