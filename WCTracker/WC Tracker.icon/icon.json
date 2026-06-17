@@ -1,0 +1,501 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:1.00000,0.85052,0.55842,1.00000",
+              "display-p3:0.94039,0.79746,0.23976,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0.6713560885608856
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0
+              }
+            }
+          },
+          "image-name" : "trophy.fill@2x.png",
+          "name" : "trophy.fill@2x",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0.5,
+              0.5
+            ]
+          }
+        },
+        {
+          "hidden-specializations" : [
+            {
+              "appearance" : "light",
+              "value" : true
+            }
+          ],
+          "image-name" : "rectangle.portrait@2x.png",
+          "name" : "rectangle.portrait@2x",
+          "position" : {
+            "scale" : 1.5,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "extended-gray:0.00000,1.00000"
+          },
+          "glass" : true,
+          "hidden-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : false
+            }
+          ],
+          "image-name" : "rectangle.portrait.fill@2x.png",
+          "name" : "rectangle.portrait.fill@2x",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 1.5,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "extended-gray:0.00000,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "rectangle.portrait.fill@2x.png",
+          "name" : "rectangle.portrait.fill@2x",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 1.5,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "image-name" : "circle.fill@2x.png",
+          "name" : "circle.fill@2x",
+          "position" : {
+            "scale" : 0.2,
+            "translation-in-points" : [
+              215.2734375,
+              0.10000000000002274
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "image-name" : "circle.fill@2x.png",
+          "name" : "circle.fill@2x",
+          "position" : {
+            "scale" : 0.2,
+            "translation-in-points" : [
+              -215.046875,
+              0.10000000000002274
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.55322,0.89551,0.75537,1.00000"
+          },
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -157.5,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.55322,0.89551,0.75537,1.00000"
+          },
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -157.5,
+              0
+            ]
+          }
+        },
+        {
+          "image-name" : "minus.rectangle@2x.png",
+          "name" : "minus.rectangle@2x",
+          "position" : {
+            "scale" : 0.35,
+            "translation-in-points" : [
+              340.859375,
+              0
+            ]
+          }
+        },
+        {
+          "image-name" : "ellipsis.rectangle@2x.png",
+          "name" : "ellipsis.rectangle@2x",
+          "position" : {
+            "scale" : 0.35,
+            "translation-in-points" : [
+              -343.0703125,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.55322,0.89551,0.75537,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              157.5,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.55322,0.89551,0.75537,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              157.5,
+              0
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "value" : "automatic"
+            },
+            {
+              "appearance" : "tinted",
+              "value" : "automatic"
+            }
+          ],
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "light",
+              "value" : false
+            }
+          ],
+          "hidden-specializations" : [
+            {
+              "appearance" : "light",
+              "value" : true
+            }
+          ],
+          "image-name" : "rectangle@2x.png",
+          "name" : "left clear",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -283.265625,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:1.01803,0.32852,0.30398,1.00000",
+              "display-p3:0.92092,0.48901,0.23587,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0,
+                "y" : 0.5
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.5
+              }
+            }
+          },
+          "glass" : true,
+          "hidden-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : true
+            }
+          ],
+          "image-name" : "rectangle@2x.png",
+          "name" : "left",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -283.265625,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : "automatic",
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "light",
+              "value" : false
+            }
+          ],
+          "hidden-specializations" : [
+            {
+              "appearance" : "light",
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : false
+            }
+          ],
+          "image-name" : "rectangle@2x.png",
+          "name" : "right clear",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              279.8828125,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.99567,1.00000,0.54139,1.00000",
+              "extended-srgb:0.79608,0.18824,0.87843,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0.5
+              },
+              "stop" : {
+                "x" : 1,
+                "y" : 0.5
+              }
+            }
+          },
+          "glass" : true,
+          "hidden-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : true
+            }
+          ],
+          "image-name" : "rectangle@2x.png",
+          "name" : "right",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              279.8828125,
+              0
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "image-name" : "rectangle.fill@2x 2.png",
+          "name" : "rectangle.fill@2x 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -276,
+              0
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "hidden" : false,
+          "image-name" : "rectangle.fill@2x 2.png",
+          "name" : "rectangle.fill@2x 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              275,
+              0
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "ScoreBoard",
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          0,
+          -185
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.6
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.2
+      }
+    },
+    {
+      "blur-material" : 0.5,
+      "layers" : [
+        {
+          "image-name" : "Untitled-1.png",
+          "name" : "Untitled-1",
+          "position" : {
+            "scale" : 0.57,
+            "translation-in-points" : [
+              2.556874999999991,
+              465.515625
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "extended-srgb:0.20392,0.78039,0.34902,1.00000"
+              }
+            }
+          ],
+          "glass" : false,
+          "hidden-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name" : "rectangle.fill@2x 2.png",
+          "name" : "rectangle.fill@2x 2",
+          "position" : {
+            "scale" : 3,
+            "translation-in-points" : [
+              0,
+              490.44562499999995
+            ]
+          }
+        }
+      ],
+      "lighting" : "combined",
+      "name" : "Pitch",
+      "shadow" : {
+        "kind" : "none",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.2
+      }
+    },
+    {
+      "layers" : [
+        {
+          "blend-mode" : "lighten",
+          "fill" : {
+            "solid" : "extended-srgb:0.20392,0.78039,0.34902,1.00000"
+          },
+          "glass" : true,
+          "hidden-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : true
+            }
+          ],
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 5,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "blend-mode" : "lighten",
+          "fill" : {
+            "solid" : "extended-srgb:0.20392,0.78039,0.34902,1.00000"
+          },
+          "glass" : true,
+          "hidden-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : true
+            }
+          ],
+          "image-name" : "square.fill@2x.png",
+          "name" : "square.fill@2x",
+          "position" : {
+            "scale" : 5,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "name" : "BG",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
