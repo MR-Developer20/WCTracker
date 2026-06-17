@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Top-level CFBundleIconName required by App Store validation (ITMS-90713).
+	     actool only writes the nested CFBundleIcons copy for the .icon (Icon Composer)
+	     app icon, and Xcode reserves the key from INFOPLIST_KEY_*, so it's declared
+	     here. The rest of Info.plist is still generated (GENERATE_INFOPLIST_FILE) and
+	     merged on top of this base file. -->
+	<key>CFBundleIconName</key>
+	<string>WC Tracker</string>
+</dict>
+</plist>

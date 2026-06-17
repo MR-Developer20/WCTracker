@@ -200,6 +200,7 @@
 				DEVELOPMENT_TEAM = JVZUW97N2H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "WC Tracker";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo to use as the tournament badge.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -234,6 +235,7 @@
 				DEVELOPMENT_TEAM = JVZUW97N2H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "WC Tracker";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo to use as the tournament badge.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
