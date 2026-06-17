@@ -495,13 +495,17 @@ struct BroadcastScoreboard: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { ctx in
             if let match, let home, let away {
-                HStack(alignment: .center, spacing: 8) {
-                    clockColumn(match, now: ctx.date)
-                    // Pull the bar left so it covers the chip's tucked cream edge
-                    // (the bar is declared later, so it draws on top).
-                    pill(match: match, home: home, away: away)
-                        .padding(.leading, -(clockTuck + 8))
-                }
+                // The pill is the layout anchor; the clock chip is a background pinned
+                // to the pill's leading edge and extends to the LEFT (its right edge
+                // tucks under the bar). So a wide clock grows into the empty space on
+                // the left instead of pushing/squishing the team names.
+                pill(match: match, home: home, away: away)
+                    .background(alignment: .leading) {
+                        clockColumn(match, now: ctx.date)
+                            // Align the chip's text/tuck seam (width − tuck) to the
+                            // pill's leading edge: text sits left, cream tuck under it.
+                            .alignmentGuide(.leading) { d in d.width - clockTuck }
+                    }
             } else {
                 placeholder
             }
@@ -515,14 +519,37 @@ struct BroadcastScoreboard: View {
     private func clockColumn(_ match: Match, now: Date) -> some View {
         clockChip(match, now: now)
             .overlay(alignment: .bottomLeading) {
-                // The broadcast-minute string already carries "+N", so the stoppage
-                // sub-chip is only used by the running MM:SS clock.
-                if !broadcastClock, let over = stoppageElapsed(match, now: now) {
+                if broadcastClock {
+                    // Accurate mode: show the "+N'" added time as its own pill so the
+                    // main chip stays "45'"/"90'" and doesn't widen the clock. Hidden
+                    // at HT (the feed freezes displayClock at "45'+x" through the break).
+                    if match.phase(now: now) == .live, !match.isHalftime,
+                       let added = broadcastAdded(match) {
+                        overtimePill(added).fixedSize().offset(y: 30)
+                    }
+                } else if let over = stoppageElapsed(match, now: now) {
                     stoppageChip(over: over, plus: match.announcedAddedTime)
                         .fixedSize()
                         .offset(y: 30)
                 }
             }
+    }
+
+    /// The "+N'" suffix of the broadcast clock ("45'+4'" → "+4'"); nil when not in
+    /// added time.
+    private func broadcastAdded(_ match: Match) -> String? {
+        guard let dc = match.displayClock, let r = dc.range(of: "+") else { return nil }
+        return String(dc[r.lowerBound...])
+    }
+
+    /// Added-time pill for accurate mode — mint "+N'" on the bar-black chip.
+    private func overtimePill(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 14, weight: .black))
+            .foregroundStyle(Brand.mint)
+            .padding(.horizontal, 9).padding(.vertical, 3)
+            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Brand.barBlack))
+            .shadow(color: .black.opacity(0.3), radius: 4, y: 1)
     }
 
     /// The minute the clock holds at while added time shows — the current period's
@@ -597,8 +624,12 @@ struct BroadcastScoreboard: View {
             return df.string(from: date)
         case .live:
             if match.isHalftime { return "HT" }
-            // Exact broadcast minute ("37'", "45'+2'") when the user prefers it.
-            if broadcastClock, let dc = match.displayClock, !dc.isEmpty { return dc }
+            // Exact broadcast minute when the user prefers it — base minute only
+            // ("45'+2'" → "45'"); the "+2'" added time shows in its own pill.
+            if broadcastClock, let dc = match.displayClock, !dc.isEmpty {
+                if let r = dc.range(of: "+") { return String(dc[..<r.lowerBound]) }
+                return dc
+            }
             guard let elapsed = match.elapsed(now: now) else { return "LIVE" }
             // Hold at the period boundary during added time; otherwise tick freely
             // (so normal play — including extra time past 90' — counts up).
@@ -653,8 +684,10 @@ struct BroadcastScoreboard: View {
                 Circle().fill(Color.kit(for: team)).frame(width: 9, height: 9)
                     .overlay(Circle().strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
                 Text(team.code).font(.system(size: 24, weight: .black)).foregroundStyle(.white)
+                    .lineLimit(1).fixedSize()
             } else {
                 Text(team.code).font(.system(size: 24, weight: .black)).foregroundStyle(.white)
+                    .lineLimit(1).fixedSize()
                 Circle().fill(Color.kit(for: team)).frame(width: 9, height: 9)
                     .overlay(Circle().strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
                 flagView(team)
