@@ -2,22 +2,17 @@ import SwiftUI
 
 @main
 struct WCTrackerApp: App {
-    @StateObject private var tournament: TournamentStore
     @StateObject private var center: MatchCenterStore
 
     init() {
-        let store = TournamentStore()
-        _tournament = StateObject(wrappedValue: store)
-        _center = StateObject(wrappedValue: MatchCenterStore(tournament: store))
+        // Stores are owned by AppEnvironment so the CarPlay scene shares them.
+        _center = StateObject(wrappedValue: AppEnvironment.shared.center)
     }
 
     var body: some Scene {
         WindowGroup {
             SecondScreenView(center: center)
-                .task {
-                    tournament.start()
-                    center.start()
-                }
+                .task { AppEnvironment.shared.startIfNeeded() }
         }
     }
 }

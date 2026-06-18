@@ -6,5 +6,13 @@
 	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<!-- CarPlay: required for the CarPlay scene to launch. Apple grants a CarPlay
+	     entitlement per app category; none fit a sports app, so this is intended for
+	     personal / development use against the CarPlay Simulator and must match a
+	     provisioning profile that includes it. The parking category permits the
+	     CPTabBar / CPInformation / CPList templates this app uses. Remove this key to
+	     build the phone app without CarPlay. -->
+	<key>com.apple.developer.carplay-parking</key>
+	<true/>
 </dict>
 </plist>
