@@ -14,6 +14,10 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                                   didConnect interfaceController: CPInterfaceController) {
         self.interfaceController = interfaceController
 
+        // Render the scoreboard image at the car screen's scale so it stays crisp.
+        let scale = interfaceController.carTraitCollection.displayScale
+        interface.imageScale = scale > 0 ? scale : 2
+
         let env = AppEnvironment.shared
         env.startIfNeeded()
         interface.update(env: env)

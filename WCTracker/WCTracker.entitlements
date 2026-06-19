@@ -6,13 +6,16 @@
 	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
-	<!-- CarPlay: required for the CarPlay scene to launch. Apple grants a CarPlay
-	     entitlement per app category; none fit a sports app, so this is intended for
-	     personal / development use against the CarPlay Simulator and must match a
-	     provisioning profile that includes it. The parking category permits the
-	     CPTabBar / CPInformation / CPList templates this app uses. Remove this key to
-	     build the phone app without CarPlay. -->
-	<key>com.apple.developer.carplay-parking</key>
+	<!-- CarPlay: required for the CarPlay scene to launch. CarPlay apps are
+	     single-category; the "driving task" category (introduced in iOS 16) is the
+	     catch-all for simple apps that surface glanceable info and controls while
+	     driving, which fits this live-match tracker better than the other categories.
+	     It permits the CPTabBar / CPInformation / CPList templates this app uses.
+	     Apple grants this entitlement per app via the CarPlay request form
+	     (developer.apple.com/contact/carplay) and it must match a provisioning
+	     profile that includes it. Remove this key to build the phone app without
+	     CarPlay. -->
+	<key>com.apple.developer.carplay-driving-task</key>
 	<true/>
 </dict>
 </plist>
